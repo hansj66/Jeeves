@@ -1,0 +1,10 @@
+#ifndef ERRORS_H
+#define ERRORS_H
+
+enum {
+    NO_ERROR = 0,
+    UNRECOGNIZED_ARGUMENT,
+    BAD_BROADCAST_ADDRESS
+} ERROR;
+
+#endif // ERRORS_H
