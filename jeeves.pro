@@ -29,13 +29,19 @@ HEADERS += \
     jeeves.h
 
 macx {
-    #Use clang for C++11
+    # Mac-specific if you are compiling, using gcc. Update these two lines to match your target Mac OS SDK
+    QMAKE_MACOSX_DEPLOYMENT_TARGET=10.7
+    QMAKE_MAC_SDK = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk
+}
+
+macx-clang {
     QMAKE_CXXFLAGS += -std=c++11
 }
 
-!mac:unix {
+win32-msvc {
+    QMAKE_CXXFLAGS += /MP
 }
 
-win32 {
-    win32-msvc:QMAKE_CXXFLAGS += /MP
-}
+OTHER_FILES += \
+    LICENSE.TXT \
+    README.md
