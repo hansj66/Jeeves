@@ -21,17 +21,21 @@
 #include <QObject>
 #include <QMap>
 #include <QtNetwork>
+#include <QStringList>
 
 class Locator : public QObject
 {
     Q_OBJECT
 public:
     explicit Locator(QHostAddress & broadcastAddress, QObject *parent = 0);
+    QStringList BuildMachineAPIs();
 
 private:
     QUdpSocket *            m_udpSocket;
     QMap<QString, QString>  m_builders;
-    QHostAddress            m_broadcastAddress;
+    QHostAddress                   m_broadcastAddress;
+
+    QString GetAPI(QString buildMachineURL);
 
 signals:
     void finished();

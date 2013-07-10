@@ -15,13 +15,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ERRORS_H
-#define ERRORS_H
+#include "build.h"
 
-enum ERROR {
-    NO_ERROR = 0,
-    UNRECOGNIZED_ARGUMENT,
-    BAD_BROADCAST_ADDRESS
-};
+Build::Build(QString name, QString url, QString color) :
+    m_name(name),
+    m_url(url),
+    m_color(color)
+{
+}
 
-#endif // ERRORS_H
+QString Build::ToString() const
+{
+    return QString("name=%1, color=%2, url=%3").arg(m_name).arg(m_color).arg(m_url);
+}

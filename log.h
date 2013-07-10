@@ -29,7 +29,6 @@ private:
     Log();
     QString TimeStamp() const;
 
-
 public:
     static Log * Instance();
     ~Log();

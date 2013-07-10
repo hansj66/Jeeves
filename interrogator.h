@@ -15,13 +15,34 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ERRORS_H
-#define ERRORS_H
+#ifndef INTERROGATOR_H
+#define INTERROGATOR_H
 
-enum ERROR {
-    NO_ERROR = 0,
-    UNRECOGNIZED_ARGUMENT,
-    BAD_BROADCAST_ADDRESS
+#include <QNetworkAccessManager>
+#include <QUrl>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QStringList>
+#include <QList>
+
+#include "build.h"
+
+class Interrogator : QObject
+{
+    Q_OBJECT
+
+public:
+    Interrogator(QObject * parent = 0);
+
+    void RequestBuilds(QStringList apiList);
+    QList<Build> GetBuilds();
+
+public slots:
+    void OnRequestFinished(QNetworkReply * reply);
+
+private:
+    QNetworkAccessManager * m_accessManager;
+    QMap<QString, Build> m_builds;
 };
 
-#endif // ERRORS_H
+#endif // INTERROGATOR_H

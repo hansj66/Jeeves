@@ -23,6 +23,7 @@
 #include <QTimer>
 
 #include "locator.h"
+#include "interrogator.h"
 
 class Jeeves : public QCoreApplication
 {
@@ -36,7 +37,8 @@ public slots:
 
 private:
     Locator * m_locator;
-    QTimer * m_timer;
+    Interrogator * m_interrogator;
+    QTimer * m_broadcastTimer;
 };
 
 #endif // JEEVES_H

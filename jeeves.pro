@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core network
+QT       += core network xml
 
 QT       -= gui
 
@@ -19,14 +19,18 @@ INCLUDEPATH += $$(BOOSTPATH)
 SOURCES += main.cpp \
     locator.cpp \
     log.cpp \
-    jeeves.cpp
+    jeeves.cpp \
+    interrogator.cpp \
+    build.cpp
 
 HEADERS += \
     errors.h \
     network.h \
     locator.h \
     log.h \
-    jeeves.h
+    jeeves.h \
+    interrogator.h \
+    build.h
 
 macx {
     # Mac-specific if you are compiling, using gcc. Update these two lines to match your target Mac OS SDK

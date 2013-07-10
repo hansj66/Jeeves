@@ -15,13 +15,29 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ERRORS_H
-#define ERRORS_H
+#ifndef BUILD_H
+#define BUILD_H
 
-enum ERROR {
-    NO_ERROR = 0,
-    UNRECOGNIZED_ARGUMENT,
-    BAD_BROADCAST_ADDRESS
+#include <QString>
+
+class Build
+{
+public:
+    Build() {}
+    Build(QString name, QString url, QString color);
+    void Name(QString name) { m_name=name; }
+    void Url(QString url) { m_url=url; }
+    void Color(QString color) { m_color=color; }
+    QString Name() const  { return m_name; }
+    QString Url() const { return m_url; }
+    QString Color() const { return m_color; }
+
+    QString ToString() const;
+
+private:
+    QString m_name;
+    QString m_url;
+    QString m_color;
 };
 
-#endif // ERRORS_H
+#endif // BUILD_H
