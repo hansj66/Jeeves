@@ -26,5 +26,13 @@ Build::Build(QString name, QString url, QString color) :
 
 QString Build::ToString() const
 {
-    return QString("name=%1, color=%2, url=%3").arg(m_name).arg(m_color).arg(m_url);
+    QString build = QString("\n\n\tname=%1\n\tlast build number=%2\n\turl=%3\n\tResult=%4\n").arg(m_name).arg(m_number).arg(m_url).arg(m_result);
+
+    if (m_culprits.length() == 0)
+        return build;
+
+    build.append("\tculprits=");
+    for (int i=0; i<m_culprits.length(); i++)
+        build.append(QString("%1,").arg(m_culprits.at(i)));
+    return build.left(build.length()-1);
 }

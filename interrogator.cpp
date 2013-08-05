@@ -24,17 +24,22 @@ Interrogator::Interrogator(QObject * parent) :
     QObject(parent)
 {
     m_accessManager = new QNetworkAccessManager(this);
-    QObject::connect(m_accessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(OnRequestFinished(QNetworkReply*)));
-}
 
-void Interrogator::RequestBuilds(QStringList apiList)
+    QObject::connect(m_accessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(OnRequestReceived(QNetworkReply*)));
+  }
+
+void Interrogator::Request(QStringList apiList)
 {
     foreach (QString api, apiList)
     {
-        Log::Instance()->Status(QString("Firing of a request to %1").arg(api));
-        QUrl url(api);
-        m_accessManager->get(QNetworkRequest(url));
+        Request(api);
     }
+}
+
+void Interrogator::Request(QString api)
+{
+    QUrl url(api);
+    m_accessManager->get(QNetworkRequest(url));
 }
 
 QList<Build> Interrogator::GetBuilds()
@@ -51,45 +56,138 @@ QList<Build> Interrogator::GetBuilds()
     return builds;
 }
 
-void Interrogator::OnRequestFinished(QNetworkReply * reply)
+
+void Interrogator::OnRequestReceived(QNetworkReply * reply)
 {
     QVariant statusCodeV = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
     if (reply->error() == QNetworkReply::NoError)
     {
         QByteArray data = reply->readAll();
 
-        // Oh the joys of "quick" and dirty XML parsing...
+        // Oh, the joys of "quick" and dirty XML parsing...
         QXmlStreamReader xml(data);
-        while (!xml.atEnd())
-        {
-            xml.readNextStartElement();
-            if (xml.name() == "job")
-            {
-                xml.readNext();
-                Build b;
-                while (!(xml.tokenType() == QXmlStreamReader::EndElement &&  xml.name() == "job"))
-                {
-                    if (xml.name() == "name")
-                    {
-                        b.Name(xml.readElementText());
-                    }
-                    else if (xml.name() == "url")
-                    {
-                        b.Url(xml.readElementText());
-                    }
-                    else if (xml.name() == "color")
-                    {
-                        b.Color(xml.readElementText());
-                    }
-                    xml.readNext();
-                }
-                m_builds[b.Url()] = b;
-            }
-        }
+        xml.readNextStartElement();
+
+        if (xml.name() == "hudson")
+            ParseHudsonResponse(xml);
+        else if (xml.name().endsWith("Project"))
+            ParseProjectResponse(xml);
+        else if (xml.name().endsWith("Build"))
+            ParseBuildResponse(xml);
     }
     else
     {
-        Log::Instance()->Error(QString("Dang ! A HTTP request failed with status code : %1").arg(statusCodeV.toString()));
+        Log::Instance()->Error(QString("Dang ! A HTTP request (build) failed with status code : %1").arg(statusCodeV.toString()));
     }
     reply->deleteLater();
 }
+
+
+void Interrogator::ParseHudsonResponse(QXmlStreamReader & xml)
+{
+    while (!xml.atEnd())
+    {
+         xml.readNextStartElement();
+        if (xml.name() == "job")
+        {
+            xml.readNext();
+            Build b;
+            while (!(xml.tokenType() == QXmlStreamReader::EndElement &&  xml.name() == "job"))
+            {
+                if (xml.name() == "name")
+                {
+                    b.Name(xml.readElementText());
+                }
+                else if (xml.name() == "url")
+                {
+                    b.Url(xml.readElementText());
+                }
+                else if (xml.name() == "color")
+                {
+                    b.Color(xml.readElementText());
+                }
+                xml.readNext();
+            }
+            m_builds[b.Url()] = b;
+
+            Request(QString("%1api/xml").arg(b.Url()));
+        }
+    }
+}
+
+void Interrogator::ParseProjectResponse(QXmlStreamReader & xml)
+{
+    QString number;
+    QString url;
+    while (!xml.atEnd())
+    {
+         xml.readNextStartElement();
+        if (xml.name() == "lastBuild")
+        {
+            xml.readNext();
+            while (!(xml.tokenType() == QXmlStreamReader::EndElement &&  xml.name() == "lastBuild"))
+            {
+                if (xml.name() == "number")
+                {
+                    number = xml.readElementText();
+                }
+                else if (xml.name() == "url")
+                {
+                    url = xml.readElementText();
+                }
+                xml.readNext();
+
+                if ((!number.isEmpty()) && (!url.isEmpty()))
+                        break;
+            }
+
+            QString rootUrl = url.left(url.lastIndexOf("/", url.length()-2)+1);
+
+            m_builds[rootUrl].Number(number);
+            Request(QString("%1api/xml").arg(url));
+        }
+    }
+}
+
+void Interrogator::ParseBuildResponse(QXmlStreamReader & xml)
+{
+    QString result;
+    QString url;
+    QStringList culprits;
+
+    while (!xml.atEnd())
+    {
+        xml.readNextStartElement();
+        if (xml.name() == "result")
+        {
+            result = xml.readElementText();
+        }
+        else if (xml.name() == "url")
+        {
+            url = xml.readElementText();
+        }
+        else if (xml.name() == "culprit")
+        {
+            xml.readNext();
+            while (!(xml.tokenType() == QXmlStreamReader::EndElement &&  xml.name() == "culprit"))
+            {
+                if (xml.name() == "fullName")
+                {
+                    culprits.append(xml.readElementText());
+                }
+                xml.readNext();
+            }
+        }
+    }
+
+    if (url.isEmpty())
+        return;
+
+    QString rootUrl = url.left(url.lastIndexOf("/", url.length()-2)+1);
+
+     m_builds[rootUrl].Result(result);
+     m_builds[rootUrl].Culprits(culprits);
+
+}
+
+

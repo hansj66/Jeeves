@@ -35,12 +35,12 @@ void Jeeves::OnJenkinsInstanceRefresh()
 {
     QStringList apiList = m_locator->BuildMachineAPIs();
     Log::Instance()->Status(QString("Known build machines: %1").arg(apiList.count()));
-    m_interrogator->RequestBuilds(apiList);
+    m_interrogator->Request(apiList);
 
     QList<Build> builds = m_interrogator->GetBuilds();
     Log::Instance()->Status(QString("Known builds: %1").arg(builds.count()));
     for (int i=0; i<builds.count(); i++)
-        Log::Instance()->Status(QString("%1 : %2").arg(builds.at(i).Name()).arg(builds.at(i).Color()));
+        Log::Instance()->Status(builds.at(i).ToString());
 
     //emit quit();
 }

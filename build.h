@@ -19,25 +19,37 @@
 #define BUILD_H
 
 #include <QString>
+#include <QStringList>
 
 class Build
 {
 public:
     Build() {}
     Build(QString name, QString url, QString color);
-    void Name(QString name) { m_name=name; }
-    void Url(QString url) { m_url=url; }
-    void Color(QString color) { m_color=color; }
+    QString ToString() const;
+
     QString Name() const  { return m_name; }
     QString Url() const { return m_url; }
     QString Color() const { return m_color; }
 
-    QString ToString() const;
+    void Number(QString number) { m_number = number; }
+    void Result(QString result) { m_result = result; }
+    void Timestamp(QString timestamp) {m_timestamp = timestamp; }
+    void Culprits(QStringList culprits) {m_culprits = culprits; }
+    void Name(QString name) { m_name=name; }
+    void Url(QString url) { m_url=url; }
+    void Color(QString color) { m_color=color; }
+    void AddExcuse(QString excuse) {m_excuses.append(excuse); }
 
-private:
+ private:
     QString m_name;
     QString m_url;
     QString m_color;
+    QString m_number;
+    QString m_result;
+    QString m_timestamp;
+    QStringList m_culprits;
+    QStringList m_excuses;
 };
 
 #endif // BUILD_H

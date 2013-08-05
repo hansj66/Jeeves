@@ -19,6 +19,7 @@
 #define INTERROGATOR_H
 
 #include <QNetworkAccessManager>
+#include <QXmlStreamReader>
 #include <QUrl>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -34,11 +35,15 @@ class Interrogator : QObject
 public:
     Interrogator(QObject * parent = 0);
 
-    void RequestBuilds(QStringList apiList);
+    void Request(QStringList apiList);
+    void Request(QString api);
     QList<Build> GetBuilds();
 
 public slots:
-    void OnRequestFinished(QNetworkReply * reply);
+    void OnRequestReceived(QNetworkReply * reply);
+    void ParseHudsonResponse(QXmlStreamReader & xml);
+    void ParseProjectResponse(QXmlStreamReader & xml);
+    void ParseBuildResponse(QXmlStreamReader & xml);
 
 private:
     QNetworkAccessManager * m_accessManager;
