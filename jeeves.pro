@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core network xml
-
-QT       -= gui
+QT       += core network xml gui
 
 TARGET = jeeves
 CONFIG   += console
@@ -21,7 +19,8 @@ SOURCES += main.cpp \
     log.cpp \
     jeeves.cpp \
     interrogator.cpp \
-    build.cpp
+    build.cpp \
+    statusscreen.cpp
 
 HEADERS += \
     errors.h \
@@ -30,7 +29,8 @@ HEADERS += \
     log.h \
     jeeves.h \
     interrogator.h \
-    build.h
+    build.h \
+    statusscreen.h
 
 macx {
     # Mac-specific if you are compiling, using gcc. Update these two lines to match your target Mac OS SDK

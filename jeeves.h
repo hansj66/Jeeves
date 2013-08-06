@@ -18,27 +18,20 @@
 #ifndef JEEVES_H
 #define JEEVES_H
 
-#include <QCoreApplication>
+#include <QApplication>
 #include <QtNetwork>
 #include <QTimer>
 
 #include "locator.h"
 #include "interrogator.h"
 
-class Jeeves : public QCoreApplication
+class Jeeves : public QApplication
 {
     Q_OBJECT
 
 public:
     Jeeves(QHostAddress broadcastAddress, int &argc, char **argv);
 
-public slots:
-    void OnJenkinsInstanceRefresh();
-
-private:
-    Locator * m_locator;
-    Interrogator * m_interrogator;
-    QTimer * m_broadcastTimer;
 };
 
 #endif // JEEVES_H

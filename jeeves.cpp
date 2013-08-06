@@ -16,31 +16,11 @@
 */
 
 #include "jeeves.h"
-#include "log.h"
-#include "interrogator.h"
+#include "statusscreen.h"
 
 Jeeves::Jeeves(QHostAddress broadcastAddress, int &argc, char **argv) :
-    QCoreApplication(argc, argv)
+    QApplication(argc, argv)
 {
-    m_locator = new Locator(broadcastAddress, this);
-    m_interrogator = new Interrogator(this);
-    connect(m_locator, SIGNAL(finished()), this, SLOT(OnJenkinsInstanceRefresh()));
-    m_broadcastTimer = new QTimer(this);
-    connect(m_broadcastTimer, SIGNAL(timeout()), m_locator, SLOT(run()));
-    m_broadcastTimer->start(1000);
+   new StatusScreen(broadcastAddress);
  }
 
-
-void Jeeves::OnJenkinsInstanceRefresh()
-{
-    QStringList apiList = m_locator->BuildMachineAPIs();
-    Log::Instance()->Status(QString("Known build machines: %1").arg(apiList.count()));
-    m_interrogator->Request(apiList);
-
-    QList<Build> builds = m_interrogator->GetBuilds();
-    Log::Instance()->Status(QString("Known builds: %1").arg(builds.count()));
-    for (int i=0; i<builds.count(); i++)
-        Log::Instance()->Status(builds.at(i).ToString());
-
-    //emit quit();
-}

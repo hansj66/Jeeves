@@ -36,3 +36,34 @@ QString Build::ToString() const
         build.append(QString("%1,").arg(m_culprits.at(i)));
     return build.left(build.length()-1);
 }
+
+QString Build::ToDisplayString() const
+{
+    QString build = QString("%1 (Build #%2) ").arg(m_name).arg(m_number);
+
+    if (m_culprits.length() == 0)
+        return build;
+
+    build.append("Culprit");
+    if (m_culprits.length() > 1)
+        build.append("s");
+
+    build.append(" : ");
+    for (int i=0; i<m_culprits.length(); i++)
+        build.append(QString("%1,").arg(m_culprits.at(i)));
+    return build.left(build.length()-1);
+}
+
+bool Build::IsConsistent() const
+{
+    if ((m_name.isEmpty()) || m_url.isEmpty() || m_number.isEmpty())
+            return false;
+    return true;
+}
+
+bool Build::IsBuilding() const
+{
+    return (m_result.isEmpty() && !m_url.isEmpty());
+}
+
+

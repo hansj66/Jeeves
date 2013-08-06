@@ -27,6 +27,7 @@ public:
     Build() {}
     Build(QString name, QString url, QString color);
     QString ToString() const;
+    QString ToDisplayString() const;
 
     QString Name() const  { return m_name; }
     QString Url() const { return m_url; }
@@ -34,12 +35,18 @@ public:
 
     void Number(QString number) { m_number = number; }
     void Result(QString result) { m_result = result; }
+    QString Result() const { return m_result; }
+    bool Failed() const { return m_result == "FAILURE"; }
+    bool Success() const { return m_result == "SUCCESS"; }
     void Timestamp(QString timestamp) {m_timestamp = timestamp; }
     void Culprits(QStringList culprits) {m_culprits = culprits; }
     void Name(QString name) { m_name=name; }
     void Url(QString url) { m_url=url; }
     void Color(QString color) { m_color=color; }
     void AddExcuse(QString excuse) {m_excuses.append(excuse); }
+
+    bool IsConsistent() const;
+    bool IsBuilding() const;
 
  private:
     QString m_name;
