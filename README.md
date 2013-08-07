@@ -20,5 +20,6 @@ You should be able to compile Jeeves on any platform supported by the Qt framewo
 Tested compilers (so far):
 
 - Microsoft Visual C++ Compiler 10.0
-- Clang-425.0.24
+- Clang-425.0.24 (Mac)
 - gcc-4.2 (pretty old, but latest gcc on Mac)
+- Debian Clang 3.0-6l+rpil (Raspberry)
