@@ -41,12 +41,14 @@ public:
     void Timestamp(QString timestamp) {m_timestamp = timestamp; }
     void Culprits(QStringList culprits) {m_culprits = culprits; }
     void Name(QString name) { m_name=name; }
+    QString Name() { return m_name.replace("%20", " ");}
     void Url(QString url) { m_url=url; }
     void Color(QString color) { m_color=color; }
     void AddExcuse(QString excuse) {m_excuses.append(excuse); }
 
     bool IsConsistent() const;
     bool IsBuilding() const;
+    QString MachineShortName() const;
 
  private:
     QString m_name;

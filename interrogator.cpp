@@ -16,17 +16,24 @@
 */
 
 #include <QXmlStreamReader>
+#include <QCoreApplication>
 
 #include "interrogator.h"
 #include "log.h"
 
-Interrogator::Interrogator(QObject * parent) :
-    QObject(parent)
+Interrogator::Interrogator(QMap<QString, Build> * builds, QObject * parent) :
+    QObject(parent),
+   m_builds(builds)
 {
-    m_accessManager = new QNetworkAccessManager(this);
+    m_accessManager = new QNetworkAccessManager();
+    connect(m_accessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(OnRequestReceived(QNetworkReply*)));
+}
 
-    QObject::connect(m_accessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(OnRequestReceived(QNetworkReply*)));
-  }
+Interrogator::~Interrogator()
+{
+    disconnect(m_accessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(OnRequestReceived(QNetworkReply*)));
+    delete m_accessManager;
+}
 
 void Interrogator::Request(QStringList apiList)
 {
@@ -38,22 +45,7 @@ void Interrogator::Request(QStringList apiList)
 
 void Interrogator::Request(QString api)
 {
-    QUrl url(api);
-    m_accessManager->get(QNetworkRequest(url));
-}
-
-QList<Build> Interrogator::GetBuilds()
-{
-    QList<Build> builds;
-
-    QMapIterator<QString, Build> i(m_builds);
-    while (i.hasNext())
-    {
-        i.next();
-        builds.append(i.value());
-    }
-
-    return builds;
+    m_accessManager->get(QNetworkRequest(QUrl(api)));
 }
 
 
@@ -79,7 +71,9 @@ void Interrogator::OnRequestReceived(QNetworkReply * reply)
     {
         Log::Instance()->Error(QString("Dang ! A HTTP request (build) failed with status code : %1").arg(statusCodeV.toString()));
     }
+
     reply->deleteLater();
+    reply->close();
 }
 
 
@@ -108,8 +102,7 @@ void Interrogator::ParseHudsonResponse(QXmlStreamReader & xml)
                 }
                 xml.readNext();
             }
-            m_builds[b.Url()] = b;
-
+            (*m_builds)[b.Url()] = b;
             Request(QString("%1api/xml").arg(b.Url()));
         }
     }
@@ -143,7 +136,7 @@ void Interrogator::ParseProjectResponse(QXmlStreamReader & xml)
 
             QString rootUrl = url.left(url.lastIndexOf("/", url.length()-2)+1);
 
-            m_builds[rootUrl].Number(number);
+            (*m_builds)[rootUrl].Number(number);
             Request(QString("%1api/xml").arg(url));
         }
     }
@@ -185,9 +178,8 @@ void Interrogator::ParseBuildResponse(QXmlStreamReader & xml)
 
     QString rootUrl = url.left(url.lastIndexOf("/", url.length()-2)+1);
 
-     m_builds[rootUrl].Result(result);
-     m_builds[rootUrl].Culprits(culprits);
-
+     (*m_builds)[rootUrl].Result(result);
+     (*m_builds)[rootUrl].Culprits(culprits);
 }
 
 

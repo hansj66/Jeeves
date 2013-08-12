@@ -23,3 +23,8 @@ Tested compilers (so far):
 - Clang-425.0.24 (Mac)
 - gcc-4.2 (pretty old, but latest gcc on Mac)
 - Debian Clang 3.0-6l+rpil (Raspberry)
+
+Disable any screen saver, power save before starting the application.
+To turn off screen blanking on a Raspberry running LXDE, execute the following commands:
+xset s off
+xset -dpms
