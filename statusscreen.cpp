@@ -76,7 +76,7 @@ void StatusScreen::OnJenkinsInstanceRefresh()
 void StatusScreen::RefreshLayout()
 {
     m_DisplayLines.clear();
-    QVBoxLayout * layout = new QVBoxLayout(this);
+    QVBoxLayout * layout = new QVBoxLayout();
     for (int i=0; i<m_builds.count(); i++)
     {
         QLineEdit * pEdit = new QLineEdit(this);
@@ -126,11 +126,11 @@ void StatusScreen::RefreshData()
         if (i.value().IsConsistent())
         {
             if (i.value().Failed())
-                m_DisplayLines.at(line)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FF5555, stop: 1 #FF0000); font-size: 24pt; font-weight:bold;}").arg(m_lineHeight));
+                m_DisplayLines.at(line)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FF5555, stop: 1 #FF0000); font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
             else if (i.value().Success())
-                  m_DisplayLines.at(line)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #5555FF, stop: 1 #0000FF);; color: white; font-size: 24pt; font-weight:bold;}").arg(m_lineHeight));
+                  m_DisplayLines.at(line)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #AAAAFF, stop: 1 #0000FF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
             else if (i.value().IsBuilding())
-                m_DisplayLines.at(line)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF);; color: white; font-size: 24pt; font-weight:bold;}").arg(m_lineHeight));
+                m_DisplayLines.at(line)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
 
             m_DisplayLines.at(line)->setText(i.value().ToDisplayString());
         }
