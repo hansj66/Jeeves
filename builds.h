@@ -40,7 +40,9 @@ public:
     QStringList WaitMessages();
 
     int Count();
-    int Filtered();
+    int Excluded();
+
+    Builds Filtered();
 
     bool Failed(int index);
     bool Success(int index);
@@ -49,7 +51,7 @@ public:
 
 private:
     QMap<QString, Build>  m_builds;
-
+    void Append(QString key, Build b);
     bool IsFiltered(Build b);
 };
 

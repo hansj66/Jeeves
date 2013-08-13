@@ -77,7 +77,7 @@ void Builds::RemoveStale()
     }
 }
 
-int Builds::Filtered()
+int Builds::Excluded()
 {
     QMapIterator<QString, Build> i(m_builds);
     int count= 0;
@@ -92,15 +92,7 @@ int Builds::Filtered()
 
 int Builds::Count()
 {
-    QMapIterator<QString, Build> i(m_builds);
-    int count= 0;
-    while (i.hasNext())
-    {
-        i.next();
-        if (!IsFiltered(i.value()))
-            count++;
-    }
-    return count;
+    return m_builds.count();
 }
 
 bool Builds::IsFiltered(Build b)
@@ -125,62 +117,45 @@ QStringList Builds::WaitMessages()
 
 bool Builds::Failed(int index)
 {
-    QMapIterator<QString, Build> it(m_builds);
-    int i= 0;
-    while (it.hasNext())
-    {
-        it.next();
-        if (i == index)
-            return it.value().Failed();
-        if (!IsFiltered(it.value()))
-            i++;
-    }
-    return true;
+    return m_builds.values().at(index).Failed();
 }
 
 bool Builds::Success(int index)
 {
-    QMapIterator<QString, Build> it(m_builds);
-    int i= 0;
-    while (it.hasNext())
-    {
-        it.next();
-        if (i == index)
-            return it.value().Success();
-        if (!IsFiltered(it.value()))
-            i++;
-    }
-    return false;
+    return m_builds.values().at(index).Success();
 }
 
 bool Builds::IsBuilding(int index)
 {
-    QMapIterator<QString, Build> it(m_builds);
-    int i= 0;
-    while (it.hasNext())
-    {
-        it.next();
-        if (i == index)
-            return it.value().IsBuilding();
-        if (!IsFiltered(it.value()))
-            i++;
-    }
-    return false;
+    return m_builds.values().at(index).IsBuilding();
 }
 
 QString Builds::StatusMessage(int index)
 {
+    return m_builds.values().at(index).ToDisplayString();
+}
+
+void Builds::Append(QString key, Build b)
+{
+    m_builds[key] = b;
+}
+
+Builds Builds::Filtered()
+{
+    Builds filtered;
+
     QMapIterator<QString, Build> it(m_builds);
     int i= 0;
     while (it.hasNext())
     {
         it.next();
-        if (i == index)
-            return it.value().ToDisplayString();
+
         if (!IsFiltered(it.value()))
-            i++;
+            filtered.Append(it.key(), it.value());
+        i++;
     }
-    return "";
+
+    return filtered;
 }
 
 

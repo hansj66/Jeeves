@@ -21,6 +21,8 @@
 #include "interrogator.h"
 #include "log.h"
 
+
+
 Interrogator::Interrogator(Builds * builds, QObject * parent) :
     QObject(parent),
    m_builds(builds)

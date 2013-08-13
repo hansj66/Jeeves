@@ -20,9 +20,7 @@
 Build::Build() :
     m_lastHeardFrom(QDateTime::currentDateTime())
 {
-
 }
-
 
 QString Build::ToString() const
 {
