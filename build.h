@@ -20,18 +20,17 @@
 
 #include <QString>
 #include <QStringList>
+#include <QTime>
 
 class Build
 {
 public:
-    Build() {}
-    Build(QString name, QString url, QString color);
+    Build();
     QString ToString() const;
     QString ToDisplayString() const;
 
     QString Name() const  { return m_name; }
     QString Url() const { return m_url; }
-    QString Color() const { return m_color; }
 
     void Number(QString number) { m_number = number; }
     void Result(QString result) { m_result = result; }
@@ -43,22 +42,28 @@ public:
     void Name(QString name) { m_name=name; }
     QString Name() { return m_name.replace("%20", " ");}
     void Url(QString url) { m_url=url; }
-    void Color(QString color) { m_color=color; }
-    void AddExcuse(QString excuse) {m_excuses.append(excuse); }
+    void AddExcuse(QString excuse) { m_excuses.append(excuse); }
+    void LastHeardFrom(QDateTime time) { m_lastHeardFrom = time; }
+    QDateTime LastHeardFrom() const { return m_lastHeardFrom; }
+    void Building(QString isBuilding) { m_isBuilding = isBuilding; }
+    bool IsBuilding() const { return m_isBuilding == "true"; }
+    void Buildable(QString isBuildable)  { m_isBuildable = isBuildable; }
+    bool IsBuildable() const { return m_isBuildable == "true"; }
 
     bool IsConsistent() const;
-    bool IsBuilding() const;
     QString MachineShortName() const;
 
  private:
     QString m_name;
     QString m_url;
-    QString m_color;
     QString m_number;
     QString m_result;
     QString m_timestamp;
+    QString m_isBuilding;
+    QString m_isBuildable;
     QStringList m_culprits;
     QStringList m_excuses;
+    QDateTime m_lastHeardFrom;
 };
 
 #endif // BUILD_H

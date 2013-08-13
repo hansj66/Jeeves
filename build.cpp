@@ -17,16 +17,16 @@
 
 #include "build.h"
 
-Build::Build(QString name, QString url, QString color) :
-    m_name(name),
-    m_url(url),
-    m_color(color)
+Build::Build() :
+    m_lastHeardFrom(QDateTime::currentDateTime())
 {
+
 }
+
 
 QString Build::ToString() const
 {
-    QString build = QString("\n\n\tname=%1\n\tlast build number=%2\n\turl=%3\n\tResult=%4\n").arg(Name()).arg(m_number).arg(m_url).arg(m_result);
+    QString build = QString("\n\n\tname=%1\n\tlast build number=%2\n\turl=%3\n\tResult=%4\n\tAlive=%5\n\tIs building=%6\n\tIs buildable=%7\n").arg(Name()).arg(m_number).arg(m_url).arg(m_result).arg(m_lastHeardFrom.toString()).arg(m_isBuilding).arg(m_isBuildable);
 
     if (m_culprits.length() == 0)
         return build;
@@ -66,9 +66,5 @@ bool Build::IsConsistent() const
     return true;
 }
 
-bool Build::IsBuilding() const
-{
-    return (m_result.isEmpty() && !m_url.isEmpty());
-}
 
 

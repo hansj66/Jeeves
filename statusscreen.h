@@ -28,13 +28,14 @@
 #include "interrogator.h"
 #include "statusscreen.h"
 #include "locator.h"
+#include "builds.h"
 
 class StatusScreen : public QMainWindow
 {
     Q_OBJECT
 public:
     explicit StatusScreen(QHostAddress broadcastAddress, QWidget *parent = 0);
-    
+
 private:
     void InitBroadcast(QHostAddress broadcastAddress);
 
@@ -47,7 +48,7 @@ private:
     Locator * m_locator;
     Interrogator * m_interrogator;
     QTimer * m_broadcastTimer;
-    QMap<QString, Build> m_builds;
+    Builds m_builds;
     QList<QLineEdit *> m_DisplayLines;
 
     int m_lineHeight;

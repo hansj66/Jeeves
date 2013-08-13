@@ -20,7 +20,8 @@ SOURCES += main.cpp \
     jeeves.cpp \
     interrogator.cpp \
     build.cpp \
-    statusscreen.cpp
+    statusscreen.cpp \
+    builds.cpp
 
 HEADERS += \
     errors.h \
@@ -30,7 +31,8 @@ HEADERS += \
     jeeves.h \
     interrogator.h \
     build.h \
-    statusscreen.h
+    statusscreen.h \
+    builds.h
 
 macx {
     # Mac-specific if you are compiling, using gcc. Update these two lines to match your target Mac OS SDK

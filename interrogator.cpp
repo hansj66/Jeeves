@@ -21,7 +21,7 @@
 #include "interrogator.h"
 #include "log.h"
 
-Interrogator::Interrogator(QMap<QString, Build> * builds, QObject * parent) :
+Interrogator::Interrogator(Builds * builds, QObject * parent) :
     QObject(parent),
    m_builds(builds)
 {
@@ -85,25 +85,24 @@ void Interrogator::ParseHudsonResponse(QXmlStreamReader & xml)
         if (xml.name() == "job")
         {
             xml.readNext();
-            Build b;
+            QString name;
+            QString url;
             while (!(xml.tokenType() == QXmlStreamReader::EndElement &&  xml.name() == "job"))
             {
                 if (xml.name() == "name")
                 {
-                    b.Name(xml.readElementText());
+                    name = xml.readElementText();
                 }
                 else if (xml.name() == "url")
                 {
-                    b.Url(xml.readElementText());
-                }
-                else if (xml.name() == "color")
-                {
-                    b.Color(xml.readElementText());
+                    url = xml.readElementText();
                 }
                 xml.readNext();
             }
-            (*m_builds)[b.Url()] = b;
-            Request(QString("%1api/xml").arg(b.Url()));
+            m_builds->UpdateLastHeardFrom(url, QDateTime::currentDateTime());
+            m_builds->UpdateName(url, name);
+            m_builds->UpdateUrl(url, url);
+            Request(QString("%1api/xml").arg(url));
         }
     }
 }
@@ -112,10 +111,15 @@ void Interrogator::ParseProjectResponse(QXmlStreamReader & xml)
 {
     QString number;
     QString url;
+    QString buildable;
     while (!xml.atEnd())
     {
          xml.readNextStartElement();
-        if (xml.name() == "lastBuild")
+        if (xml.name() == "buildable")
+        {
+            buildable = xml.readElementText();
+        }
+        else if (xml.name() == "lastBuild")
         {
             xml.readNext();
             while (!(xml.tokenType() == QXmlStreamReader::EndElement &&  xml.name() == "lastBuild"))
@@ -135,8 +139,8 @@ void Interrogator::ParseProjectResponse(QXmlStreamReader & xml)
             }
 
             QString rootUrl = url.left(url.lastIndexOf("/", url.length()-2)+1);
-
-            (*m_builds)[rootUrl].Number(number);
+            m_builds->UpdateNumber(rootUrl, number);
+            m_builds->UpdateBuildable(rootUrl, buildable);
             Request(QString("%1api/xml").arg(url));
         }
     }
@@ -147,6 +151,7 @@ void Interrogator::ParseBuildResponse(QXmlStreamReader & xml)
     QString result;
     QString url;
     QStringList culprits;
+    QString isBuilding;
 
     while (!xml.atEnd())
     {
@@ -158,6 +163,10 @@ void Interrogator::ParseBuildResponse(QXmlStreamReader & xml)
         else if (xml.name() == "url")
         {
             url = xml.readElementText();
+        }
+        else if (xml.name() == "building")
+        {
+            isBuilding = xml.readElementText();
         }
         else if (xml.name() == "culprit")
         {
@@ -178,8 +187,9 @@ void Interrogator::ParseBuildResponse(QXmlStreamReader & xml)
 
     QString rootUrl = url.left(url.lastIndexOf("/", url.length()-2)+1);
 
-     (*m_builds)[rootUrl].Result(result);
-     (*m_builds)[rootUrl].Culprits(culprits);
+     m_builds->UpdateResult(rootUrl, result);
+     m_builds->UpdateCulprits(rootUrl, culprits);
+     m_builds->UpdateBuilding(rootUrl, isBuilding);
 }
 
 

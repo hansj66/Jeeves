@@ -54,19 +54,13 @@ void StatusScreen::OnJenkinsInstanceRefresh()
         m_interrogator = new Interrogator(&m_builds);
     }
 
-    Log::Instance()->Status(QString("Known builds: %1").arg(m_builds.count()));
+    Log::Instance()->Status(QString("Known builds: %1").arg(m_builds.Count()));
+    Log::Instance()->Status(QString("Filtered builds: %1").arg(m_builds.Filtered()));
 
-    if (m_discoveredBuilds != m_builds.count())
+    if (m_discoveredBuilds != m_builds.Count())
     {
-        QMapIterator<QString, Build> i(m_builds);
-        while (i.hasNext())
-        {
-            i.next();
-            Log::Instance()->Status(i.value().ToString());
-        }
-
         RefreshLayout();
-        m_discoveredBuilds = m_builds.count();
+        m_discoveredBuilds = m_builds.Count();
         InitDisplayMessage();
     }
 
@@ -75,9 +69,12 @@ void StatusScreen::OnJenkinsInstanceRefresh()
 
 void StatusScreen::RefreshLayout()
 {
+    if (m_builds.Count() == 0)
+        return;
+
     m_DisplayLines.clear();
     QVBoxLayout * layout = new QVBoxLayout();
-    for (int i=0; i<m_builds.count(); i++)
+    for (int i=0; i<m_builds.Count(); i++)
     {
         QLineEdit * pEdit = new QLineEdit(this);
         m_DisplayLines.push_back(pEdit);
@@ -96,15 +93,11 @@ void StatusScreen::RefreshLayout()
 
 void StatusScreen::InitDisplayMessage()
 {
-    QMapIterator<QString, Build> i(m_builds);
-    int line= 0;
-    while (i.hasNext())
+    QStringList messages = m_builds.WaitMessages();
+    for (int i=0; i<messages.count(); i++)
     {
-        i.next();
-
-        m_DisplayLines.at(line)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF); font-size: 24pt; font-weight:bold;}").arg(m_lineHeight));
-        m_DisplayLines.at(line)->setText(QString("Waiting for response from : %1").arg(i.value().Url()));
-        line++;
+        m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF); font-size: 24pt; font-weight:bold;}").arg(m_lineHeight));
+        m_DisplayLines.at(i)->setText(messages.at(i));
     }
 }
 
@@ -115,28 +108,19 @@ void StatusScreen::RefreshData()
         return;
     m_refreshInterval = 0;
 
-    QMapIterator<QString, Build> i(m_builds);
-    int line= 0;
-    while (i.hasNext())
+    for (int i=0; i<m_builds.Count(); i++)
     {
-        i.next();
+        if (m_builds.Failed(i))
+            m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FF5555, stop: 1 #FF0000); font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
+        else if (m_builds.Success(i))
+              m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #AAAAFF, stop: 1 #0000FF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
+        else if (m_builds.IsBuilding(i))
+            m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
 
-        Log::Instance()->Status(QString("\n\n%1\n").arg(i.value().ToString()));
-
-        if (i.value().IsConsistent())
-        {
-            if (i.value().Failed())
-                m_DisplayLines.at(line)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FF5555, stop: 1 #FF0000); font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
-            else if (i.value().Success())
-                  m_DisplayLines.at(line)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #AAAAFF, stop: 1 #0000FF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
-            else if (i.value().IsBuilding())
-                m_DisplayLines.at(line)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
-
-            m_DisplayLines.at(line)->setText(i.value().ToDisplayString());
-        }
-
-        line++;
+       m_DisplayLines.at(i)->setText(m_builds.StatusMessage(i));
     }
+
+    m_builds.RemoveStale();
  }
 
 

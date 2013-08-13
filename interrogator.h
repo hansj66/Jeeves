@@ -24,17 +24,15 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QStringList>
-#include <QList>
-#include <QMap>
 
-#include "build.h"
+#include "builds.h"
 
 class Interrogator : QObject
 {
     Q_OBJECT
 
 public:
-    Interrogator(QMap<QString, Build> * builds, QObject * parent = 0);
+    Interrogator(Builds * builds, QObject * parent = 0);
     ~Interrogator();
 
     void Request(QStringList apiList);
@@ -48,9 +46,7 @@ public slots:
 
 private:
     QNetworkAccessManager * m_accessManager;
-    QMap<QString, Build> * m_builds;
-
-    //boost::shared_ptr<QNetworkReply> m_delayedRelease;
+    Builds * m_builds;
 };
 
 #endif // INTERROGATOR_H
