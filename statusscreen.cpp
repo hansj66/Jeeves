@@ -77,6 +77,7 @@ void StatusScreen::RefreshLayout()
     for (int i=0; i<m_builds.Filtered().Count(); i++)
     {
         QLineEdit * pEdit = new QLineEdit(this);
+        pEdit->setReadOnly(true);
         m_DisplayLines.push_back(pEdit);
         layout->addWidget(pEdit);
     }
