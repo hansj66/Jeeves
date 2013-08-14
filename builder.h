@@ -15,35 +15,27 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef LOCATOR_H
-#define LOCATOR_H
+#ifndef BUILDER_H
+#define BUILDER_H
 
 #include <QObject>
-#include <QtNetwork>
-#include <QList>
+#include <QString>
 
-#include "builder.h"
-
-class Locator : public QObject
+class Builder: QObject
 {
     Q_OBJECT
+
 public:
-    explicit Locator(QHostAddress & broadcastAddress, QObject *parent = 0);
-    QStringList BuildMachineAPIs();
+    Builder(QString xml, QObject * parent);
+    QString API();
 
 private:
-    QUdpSocket *    m_udpSocket;
-    QList<Builder *>  m_builders;
-    QHostAddress    m_broadcastAddress;
+    QString rootUrl(QString xml);
+    QString tagData(QString tag);
 
-    QString GetAPI(QString buildMachineURL);
+    QString m_API;
+    QString m_XML;
+    QString m_Target;
+};
 
-signals:
-    void finished();
-
-public slots:
-    void run();
-    void readPendingDatagrams();
- };
-
-#endif // LOCATOR_H
+#endif // BUILDER_H

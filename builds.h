@@ -35,6 +35,7 @@ public:
     void UpdateResult(QString key, QString result);
     void UpdateCulprits(QString key, QStringList culprits);
     void UpdateBuilding(QString key, QString building);
+    void UpdateDescription(QString key, QString description);
     void RemoveStale();
 
     QStringList WaitMessages();

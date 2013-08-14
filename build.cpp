@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <QDebug>
 #include "build.h"
 
 Build::Build() :
@@ -62,6 +63,18 @@ bool Build::IsConsistent() const
     if ((m_name.isEmpty()) || m_url.isEmpty() || m_number.isEmpty())
             return false;
     return true;
+}
+
+void Build::Description(QString description)
+{
+    m_description = description;
+
+    if (m_description.toLower().contains("[target=windows]"))
+        m_target = Windows;
+    else if (m_description.toLower().contains("[target=mac]"))
+        m_target = Mac;
+    if (m_description.toLower().contains("[target=linux]"))
+        m_target = Linux;
 }
 
 

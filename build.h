@@ -25,6 +25,13 @@
 class Build
 {
 public:
+
+    typedef enum {
+        Windows,
+        Mac,
+        Linux
+    } TARGET_OS;
+
     Build();
     QString ToString() const;
     QString ToDisplayString() const;
@@ -49,6 +56,9 @@ public:
     bool IsBuilding() const { return m_isBuilding == "true"; }
     void Buildable(QString isBuildable)  { m_isBuildable = isBuildable; }
     bool IsBuildable() const { return m_isBuildable == "true"; }
+    void Description(QString description);
+    QString Description() const { return m_description; }
+    TARGET_OS Target() const { return m_target;}
 
     bool IsConsistent() const;
     QString MachineShortName() const;
@@ -64,6 +74,8 @@ public:
     QStringList m_culprits;
     QStringList m_excuses;
     QDateTime m_lastHeardFrom;
+    TARGET_OS m_target;
+    QString m_description;
 };
 
 #endif // BUILD_H

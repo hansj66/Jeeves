@@ -35,7 +35,7 @@ void StatusScreen::InitBroadcast(QHostAddress broadcastAddress)
     connect(m_locator, SIGNAL(finished()), this, SLOT(OnJenkinsInstanceRefresh()));
     m_broadcastTimer = new QTimer(this);
     connect(m_broadcastTimer, SIGNAL(timeout()), m_locator, SLOT(run()));
-    m_broadcastTimer->start(3000);
+    m_broadcastTimer->start(5000);
 }
 
 void StatusScreen::OnJenkinsInstanceRefresh()

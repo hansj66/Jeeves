@@ -18,7 +18,6 @@
 #include <QtNetwork>
 #include <QTextStream>
 #include <iostream>
-#include <QDomDocument>
 
 #include "locator.h"
 #include "network.h"
@@ -35,6 +34,7 @@ Locator::Locator(QHostAddress & broadcastAddress, QObject *parent) :
 
 void Locator::run()
  {
+    m_builders.clear();
     Log::Instance()->Status(QString("Broadcasting on %1 (UDP port %2)...").arg(m_broadcastAddress.toString()).arg(Jenkins_UDP));
 
     if (0 != m_udpSocket)
@@ -57,7 +57,7 @@ void Locator::readPendingDatagrams()
         datagram.resize(m_udpSocket->pendingDatagramSize());
         QHostAddress sender;
         m_udpSocket->readDatagram(datagram.data(), datagram.size(), &sender);
-        m_builders[sender.toString()] = QString(datagram);
+        m_builders.append(new Builder(QString(datagram), this));
 
         Log::Instance()->Status(QString("Jenkins instance discovered on: %1").arg(sender.toString()));
         Log::Instance()->Status(QString("Reply:%1").arg(QString(datagram)));
@@ -65,36 +65,11 @@ void Locator::readPendingDatagrams()
     emit finished();
 }
 
-QString Locator::GetAPI(QString buildMachineURL)
-{
-    QDomDocument doc;
-    if (!doc.setContent(buildMachineURL))
-    {
-        Log::Instance()->Error(QString("Bummer ! Looks like the build machine URL : %1 - is complete garbage.").arg(buildMachineURL));
-        return QString();
-    }
-
-    QDomElement root = doc.documentElement();
-    QDomNodeList urls = root.elementsByTagName("url");
-    if (1 != urls.count())
-    {
-        Log::Instance()->Error(QString("Dang ! I was hoping for a url. Instead we got %1").arg(urls.count()));
-        return QString();
-    }
-
-    return QString("%1api/xml/").arg(urls.at(0).toElement().text());
-}
-
-
  QStringList Locator::BuildMachineAPIs()
  {
      QStringList apiList;
-     QMapIterator<QString, QString> i(m_builders);
-     while (i.hasNext())
-     {
-         i.next();
-         apiList << GetAPI(i.value());
-     }
+     for (int i=0; i<m_builders.count(); i++)
+         apiList.append(m_builders.at(i)->API());
      return apiList;
  }
 

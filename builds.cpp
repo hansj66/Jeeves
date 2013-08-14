@@ -64,6 +64,12 @@ void Builds::UpdateBuilding(QString key, QString building)
     m_builds[key].Building(building);
 }
 
+
+void Builds::UpdateDescription(QString key, QString description)
+{
+    m_builds[key].Description(description);
+}
+
 void Builds::RemoveStale()
 {
     QMap<QString, Build>::Iterator it;

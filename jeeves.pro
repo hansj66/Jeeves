@@ -21,7 +21,8 @@ SOURCES += main.cpp \
     interrogator.cpp \
     build.cpp \
     statusscreen.cpp \
-    builds.cpp
+    builds.cpp \
+    builder.cpp
 
 HEADERS += \
     errors.h \
@@ -32,7 +33,8 @@ HEADERS += \
     interrogator.h \
     build.h \
     statusscreen.h \
-    builds.h
+    builds.h \
+    builder.h
 
 macx {
     # Mac-specific if you are compiling, using gcc. Update these two lines to match your target Mac OS SDK

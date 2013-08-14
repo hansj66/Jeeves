@@ -81,14 +81,15 @@ void Interrogator::OnRequestReceived(QNetworkReply * reply)
 
 void Interrogator::ParseHudsonResponse(QXmlStreamReader & xml)
 {
+    QString name;
+    QString url;
+
     while (!xml.atEnd())
     {
-         xml.readNextStartElement();
+        xml.readNextStartElement();
         if (xml.name() == "job")
         {
             xml.readNext();
-            QString name;
-            QString url;
             while (!(xml.tokenType() == QXmlStreamReader::EndElement &&  xml.name() == "job"))
             {
                 if (xml.name() == "name")
@@ -114,13 +115,25 @@ void Interrogator::ParseProjectResponse(QXmlStreamReader & xml)
     QString number;
     QString url;
     QString buildable;
+    QString rootUrl;
+    QString description;
+    bool descriptionRead = false;
+    bool descriptionUpdated = false;
+
     while (!xml.atEnd())
     {
+        if ((xml.name() == "description") && (!descriptionRead))
+        {
+            description = xml.readElementText();
+            descriptionRead = true;
+        }
+
          xml.readNextStartElement();
         if (xml.name() == "buildable")
         {
             buildable = xml.readElementText();
         }
+
         else if (xml.name() == "lastBuild")
         {
             xml.readNext();
@@ -140,10 +153,15 @@ void Interrogator::ParseProjectResponse(QXmlStreamReader & xml)
                         break;
             }
 
-            QString rootUrl = url.left(url.lastIndexOf("/", url.length()-2)+1);
+            rootUrl = url.left(url.lastIndexOf("/", url.length()-2)+1);
             m_builds->UpdateNumber(rootUrl, number);
             m_builds->UpdateBuildable(rootUrl, buildable);
             Request(QString("%1api/xml").arg(url));
+        }
+        if (!rootUrl.isEmpty() && !description.isEmpty() && !descriptionUpdated)
+        {
+            m_builds->UpdateDescription(rootUrl, description);
+            descriptionUpdated = true;
         }
     }
 }
