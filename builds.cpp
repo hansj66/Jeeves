@@ -76,7 +76,7 @@ void Builds::RemoveStale()
 
     for (it=m_builds.begin(); it != m_builds.end(); it++)
     {
-        if (it.value().LastHeardFrom().addSecs(30) < QDateTime::currentDateTime())
+        if (it.value().LastHeardFrom().addSecs(300) < QDateTime::currentDateTime())
         {
             it = m_builds.erase(it);
         }
@@ -164,5 +164,31 @@ Builds Builds::Filtered()
     return filtered;
 }
 
+bool Builds::Failed()
+{
+    Builds filtered = Filtered();
+    for (int i=0; i<filtered.Count(); i++)
+    {
+        if (filtered.Failed(i))
+            return true;
+    }
+    return false;
+}
+
+
+QString Builds::ToString()
+{
+    QString result;
+
+    QMapIterator<QString, Build> it(m_builds);
+    int i= 0;
+    while (it.hasNext())
+    {
+        it.next();
+        result.append(it.value().ToString());
+    }
+
+    return result;
+}
 
 

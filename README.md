@@ -24,7 +24,22 @@ Tested compilers (so far):
 - gcc-4.2 (pretty old, but latest gcc on Mac)
 - Debian Clang 3.0-6l+rpil (Raspberry)
 
-Disable any screen saver, power save before starting the application.
-To turn off screen blanking on a Raspberry running LXDE, execute the following commands:
+
+Firewalls
+----------
+If your build machines are hiding behind a firewall, you should add a rule to allow incoming traffic on port 33848.
+
+In Linux you can do this with by issuing the following commands
+
+sudo iptables -A INPUT -p udp --dport 33848 -j ACCEPT
+sudo service iptables save
+reboot
+
+Screen savers / Screen blanking
+------------------------------------
+You should disable any screen blanking, power save options.
+
+On a Raspberry, running LXDE, you can do this by issuing the following commands:
+
 xset s off
 xset -dpms

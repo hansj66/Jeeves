@@ -37,6 +37,7 @@ public:
     void UpdateBuilding(QString key, QString building);
     void UpdateDescription(QString key, QString description);
     void RemoveStale();
+    QString ToString();
 
     QStringList WaitMessages();
 
@@ -44,6 +45,7 @@ public:
     int Excluded();
 
     Builds Filtered();
+    bool Failed();
 
     bool Failed(int index);
     bool Success(int index);

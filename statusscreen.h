@@ -50,6 +50,7 @@ private:
     QTimer * m_broadcastTimer;
     Builds m_builds;
     QList<QLineEdit *> m_DisplayLines;
+    QWidget * m_mainWindow;
 
     int m_lineHeight;
     int m_discoveredBuilds;

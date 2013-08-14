@@ -82,10 +82,10 @@ void StatusScreen::RefreshLayout()
         layout->addWidget(pEdit);
     }
 
-    QWidget * window = new QWidget(this);
-    window->setStyleSheet("QWidget {  background: black;}");
-    window->setLayout(layout);
-    setCentralWidget(window);
+    m_mainWindow = new QWidget(this);
+    m_mainWindow->setStyleSheet("QWidget {  background: white;}");
+    m_mainWindow->setLayout(layout);
+    setCentralWidget(m_mainWindow);
 
     showMaximized();
 
@@ -109,17 +109,27 @@ void StatusScreen::RefreshData()
         return;
     m_refreshInterval = 0;
 
-    for (int i=0; i<m_builds.Filtered().Count(); i++)
+    Builds b = m_builds.Filtered();
+
+    if (b.Failed())
+        m_mainWindow->setStyleSheet(QString("QWidget {background: black;}"));
+    else
+       m_mainWindow->setStyleSheet(QString("QWidget {background: white;}"));
+
+    qDebug() << "----------------------------------------------";
+    qDebug() << b.ToString();
+    qDebug() << "----------------------------------------------";
+
+    for (int i=0; i<b.Count(); i++)
     {
-        if (m_builds.Filtered().Failed(i))
+        if (b.Failed(i))
             m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FF5555, stop: 1 #FF0000); font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
-        else if (m_builds.Filtered().Success(i))
+        else if (b.Success(i))
               m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #AAAAFF, stop: 1 #0000FF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
-        else if (m_builds.Filtered().IsBuilding(i))
+        else if (b.IsBuilding(i))
             m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
 
-        m_DisplayLines.at(i)->setText(m_builds.Filtered().StatusMessage(i));
-        //m_DisplayLines.at(i)->setText(QString("INDEX:%1").arg(i));
+        m_DisplayLines.at(i)->setText(b.StatusMessage(i));
     }
 
     m_builds.RemoveStale();
