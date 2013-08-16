@@ -23,6 +23,8 @@
 #include <QTimer>
 #include <QList>
 #include <QLineEdit>
+#include <QDateTime>
+#include <QLabel>
 
 #include "log.h"
 #include "interrogator.h"
@@ -50,14 +52,17 @@ private:
     QTimer * m_broadcastTimer;
     Builds m_builds;
     QList<QLineEdit *> m_DisplayLines;
+    QList<QLabel *> m_Icons;
     QWidget * m_mainWindow;
+    QDateTime m_started;
 
     int m_lineHeight;
     int m_discoveredBuilds;
     int m_refreshInterval;
 
-    void RefreshLayout();
+    void RefreshLayout(int nCount);
     void RefreshData();
+    void RefreshUpTime();
     void InitDisplayMessage();
 };
 

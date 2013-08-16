@@ -51,6 +51,7 @@ public:
     bool Success(int index);
     bool IsBuilding(int index);
     QString StatusMessage(int index);
+    Build::TARGET_OS Target(int index);
 
 private:
     QMap<QString, Build>  m_builds;

@@ -27,6 +27,7 @@ class Build
 public:
 
     typedef enum {
+        Undefined,
         Windows,
         Mac,
         Linux

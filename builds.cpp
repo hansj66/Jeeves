@@ -146,6 +146,11 @@ void Builds::Append(QString key, Build b)
     m_builds[key] = b;
 }
 
+Build::TARGET_OS Builds::Target(int index)
+{
+    return m_builds.values().at(index).Target();
+}
+
 Builds Builds::Filtered()
 {
     Builds filtered;

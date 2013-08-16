@@ -17,14 +17,18 @@
 #include "statusscreen.h"
 #include <QLineEdit>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPixmap>
+#include <QLabel>
 
 StatusScreen::StatusScreen(QHostAddress broadcastAddress, QWidget *parent) :
     QMainWindow(parent),
     m_discoveredBuilds(0),
     m_refreshInterval(0)
 {
+    m_started = QDateTime::currentDateTime();
     InitBroadcast(broadcastAddress);
-    this->show();
+    show();
 }
 
 
@@ -49,7 +53,7 @@ void StatusScreen::OnJenkinsInstanceRefresh()
     {
         // The implementation of the Interrogator class may be "wrong", but this seems to be the easiest way to avoid
         // memory leaking.
-        QCoreApplication::processEvents(QEventLoop::AllEvents, 1000);
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 3000);
         delete m_interrogator;
         m_interrogator = new Interrogator(&m_builds);
     }
@@ -57,39 +61,61 @@ void StatusScreen::OnJenkinsInstanceRefresh()
     Log::Instance()->Status(QString("Known builds: %1").arg(m_builds.Count()));
     Log::Instance()->Status(QString("Excluded builds: %1").arg(m_builds.Excluded()));
 
-    if (m_discoveredBuilds != m_builds.Filtered().Count())
-    {
-        RefreshLayout();
-        m_discoveredBuilds = m_builds.Filtered().Count();
-        InitDisplayMessage();
-    }
+    int nCount = m_builds.Filtered().Count();
 
+    RefreshLayout(nCount);
     RefreshData();
  }
 
-void StatusScreen::RefreshLayout()
+void StatusScreen::RefreshLayout(int nCount)
 {
-    if (m_builds.Filtered().Count() == 0)
+    if (nCount == 0)
         return;
-
-    m_DisplayLines.clear();
-    QVBoxLayout * layout = new QVBoxLayout();
-    for (int i=0; i<m_builds.Filtered().Count(); i++)
-    {
-        QLineEdit * pEdit = new QLineEdit(this);
-        pEdit->setReadOnly(true);
-        m_DisplayLines.push_back(pEdit);
-        layout->addWidget(pEdit);
-    }
-
-    m_mainWindow = new QWidget(this);
-    m_mainWindow->setStyleSheet("QWidget {  background: white;}");
-    m_mainWindow->setLayout(layout);
-    setCentralWidget(m_mainWindow);
 
     showMaximized();
 
-    m_lineHeight = (height()-100) / m_DisplayLines.size();
+    if (m_discoveredBuilds != nCount)
+    {
+        m_discoveredBuilds = nCount;
+        m_DisplayLines.clear();
+
+        m_lineHeight = (height()-100) / nCount;
+
+        QVBoxLayout * layout = new QVBoxLayout();
+        for (int i=0; i<nCount; i++)
+        {
+            QHBoxLayout * line = new QHBoxLayout();
+            QPixmap * image;
+            Build::TARGET_OS os = m_builds.Filtered().Target(i);
+            switch (os)
+            {
+                case Build::Windows: image = new QPixmap("windows-logo.png"); break;
+                case Build::Mac: image = new QPixmap("osx_logo.jpg"); break;
+                case Build::Linux: image = new QPixmap("linux-logo.jpg"); break;
+                default: image = new QPixmap("undefined.png");
+            }
+
+            QLabel * label = new QLabel(this);
+            QPixmap scaled = image->scaledToHeight(m_lineHeight);
+            label->setPixmap(scaled);
+            label->resize(50, 50);
+            line->addWidget(label);
+
+            QLineEdit * pEdit = new QLineEdit(this);
+            pEdit->setReadOnly(true);
+            m_DisplayLines.push_back(pEdit);
+            m_Icons.push_back(label);
+            line->addWidget(pEdit);
+
+            layout->addLayout(line);
+        }
+        m_mainWindow = new QWidget(this);
+        m_mainWindow->setStyleSheet("QWidget {  background: white;}");
+        m_mainWindow->setLayout(layout);
+        setCentralWidget(m_mainWindow);
+
+        InitDisplayMessage();
+    }
  }
 
 void StatusScreen::InitDisplayMessage()
@@ -97,13 +123,22 @@ void StatusScreen::InitDisplayMessage()
     QStringList messages = m_builds.Filtered().WaitMessages();
     for (int i=0; i<messages.count(); i++)
     {
+        m_Icons.at(i)->setStyleSheet(QString("QLabel {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF); font-size: 24pt; font-weight:bold;}").arg(m_lineHeight));
         m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF); font-size: 24pt; font-weight:bold;}").arg(m_lineHeight));
         m_DisplayLines.at(i)->setText(messages.at(i));
     }
 }
 
+
+void StatusScreen::RefreshUpTime()
+{
+    setWindowTitle(QString("Jeevs has been up and running for %1 days.").arg(m_started.daysTo(QDateTime::currentDateTime())));
+}
+
 void StatusScreen::RefreshData()
 {
+    RefreshUpTime();
+
     m_refreshInterval ++;
     if (m_refreshInterval < 5)
         return;
