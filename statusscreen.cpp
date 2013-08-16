@@ -132,8 +132,8 @@ void StatusScreen::InitDisplayMessage()
 
 void StatusScreen::RefreshUpTime()
 {
-    setWindowTitle(QString("Jeevs has been up and running for %1 days.").arg(m_started.daysTo(QDateTime::currentDateTime())));
-}
+    setWindowTitle(QString("Jeevs has been up and running for %1 days.").arg(QString::number((double)(m_started.secsTo(QDateTime::currentDateTime()))/86400, 'f', 4)));
+ }
 
 void StatusScreen::RefreshData()
 {
@@ -151,10 +151,6 @@ void StatusScreen::RefreshData()
     else
        m_mainWindow->setStyleSheet(QString("QWidget {background: white;}"));
 
-    qDebug() << "----------------------------------------------";
-    qDebug() << b.ToString();
-    qDebug() << "----------------------------------------------";
-
     for (int i=0; i<b.Count(); i++)
     {
         if (b.Failed(i))
@@ -162,7 +158,7 @@ void StatusScreen::RefreshData()
         else if (b.Success(i))
               m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #AAAAFF, stop: 1 #0000FF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
         else if (b.IsBuilding(i))
-            m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
+            m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; color: black; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFCC, stop: 1 #FFFF00); font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
 
         m_DisplayLines.at(i)->setText(b.StatusMessage(i));
     }
