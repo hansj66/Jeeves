@@ -72,7 +72,7 @@ void StatusScreen::RefreshLayout(int nCount)
     if (nCount == 0)
         return;
 
-    showMaximized();
+    showFullScreen();
 
     if (m_discoveredBuilds != nCount)
     {

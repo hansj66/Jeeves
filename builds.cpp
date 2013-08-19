@@ -74,7 +74,9 @@ int Builds::RemoveStale()
 {
     int removed = 0;
 
-    for (auto it=m_builds.begin(); it != m_builds.end();)
+    QMap<QString, Build>::iterator it;
+
+    for (it=m_builds.begin(); it != m_builds.end();)
     {
         if (it.value().LastHeardFrom().addSecs(300) < QDateTime::currentDateTime())
         {
