@@ -70,17 +70,23 @@ void Builds::UpdateDescription(QString key, QString description)
     m_builds[key].Description(description);
 }
 
-void Builds::RemoveStale()
+int Builds::RemoveStale()
 {
-    QMap<QString, Build>::Iterator it;
+    int removed = 0;
 
-    for (it=m_builds.begin(); it != m_builds.end(); it++)
+    for (auto it=m_builds.begin(); it != m_builds.end();)
     {
-        if (it.value().LastHeardFrom().addSecs(300) < QDateTime::currentDateTime())
+        if (it.value().LastHeardFrom().addSecs(30) < QDateTime::currentDateTime())
         {
             it = m_builds.erase(it);
+            removed++;
+        }
+        else
+        {
+            ++it;
         }
     }
+    return removed;
 }
 
 int Builds::Excluded()

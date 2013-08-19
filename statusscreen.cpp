@@ -78,6 +78,7 @@ void StatusScreen::RefreshLayout(int nCount)
     {
         m_discoveredBuilds = nCount;
         m_DisplayLines.clear();
+        m_Icons.clear();
 
         m_lineHeight = (height()-100) / nCount;
 
@@ -165,5 +166,3 @@ void StatusScreen::RefreshData()
 
     m_builds.RemoveStale();
  }
-
-
