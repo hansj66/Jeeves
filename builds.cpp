@@ -76,7 +76,7 @@ int Builds::RemoveStale()
 
     for (auto it=m_builds.begin(); it != m_builds.end();)
     {
-        if (it.value().LastHeardFrom().addSecs(30) < QDateTime::currentDateTime())
+        if (it.value().LastHeardFrom().addSecs(300) < QDateTime::currentDateTime())
         {
             it = m_builds.erase(it);
             removed++;
