@@ -64,6 +64,7 @@ private:
     void RefreshData();
     void RefreshUpTime();
     void InitDisplayMessage();
+    void UpdateStyleSheets(int nCount);
 };
 
 #endif // STATUSSCREEN_H

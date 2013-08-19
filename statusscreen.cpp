@@ -72,7 +72,7 @@ void StatusScreen::RefreshLayout(int nCount)
     if (nCount == 0)
         return;
 
-    showFullScreen();
+    showMaximized();
 
     if (m_discoveredBuilds != nCount)
     {
@@ -122,14 +122,27 @@ void StatusScreen::RefreshLayout(int nCount)
 void StatusScreen::InitDisplayMessage()
 {
     QStringList messages = m_builds.Filtered().WaitMessages();
+    UpdateStyleSheets(messages.count());
     for (int i=0; i<messages.count(); i++)
     {
-        m_Icons.at(i)->setStyleSheet(QString("QLabel {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF); font-size: 24pt; font-weight:bold;}").arg(m_lineHeight));
-        m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF); font-size: 24pt; font-weight:bold;}").arg(m_lineHeight));
         m_DisplayLines.at(i)->setText(messages.at(i));
     }
 }
 
+
+void StatusScreen::UpdateStyleSheets(int nCount)
+{
+    if (0 == nCount)
+        return;
+
+    m_lineHeight = (height()-100) / nCount;
+
+     for (int i=0; i<nCount; i++)
+     {
+         m_Icons.at(i)->setStyleSheet(QString("QLabel {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF); font-size: 24pt; font-weight:bold;}").arg(m_lineHeight));
+         m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF); font-size: 24pt; font-weight:bold;}").arg(m_lineHeight));
+     }
+}
 
 void StatusScreen::RefreshUpTime()
 {
@@ -146,6 +159,7 @@ void StatusScreen::RefreshData()
     m_refreshInterval = 0;
 
     Builds b = m_builds.Filtered();
+    UpdateStyleSheets(b.Count());
 
     if (b.Failed())
         m_mainWindow->setStyleSheet(QString("QWidget {background: black;}"));
