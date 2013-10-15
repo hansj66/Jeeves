@@ -13,28 +13,33 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 INCLUDEPATH += $$(BOOSTPATH)
+INCLUDEPATH += ./code
 
-SOURCES += main.cpp \
-    locator.cpp \
-    log.cpp \
-    jeeves.cpp \
-    interrogator.cpp \
-    build.cpp \
-    statusscreen.cpp \
-    builds.cpp \
-    builder.cpp
+
+SOURCES += code/main.cpp \
+    code/locator.cpp \
+    code/log.cpp \
+    code/jeeves.cpp \
+    code/interrogator.cpp \
+    code/build.cpp \
+    code/statusscreen.cpp \
+    code/builds.cpp \
+    code/builder.cpp
 
 HEADERS += \
-    errors.h \
-    network.h \
-    locator.h \
-    log.h \
-    jeeves.h \
-    interrogator.h \
-    build.h \
-    statusscreen.h \
-    builds.h \
-    builder.h
+    code/errors.h \
+    code/network.h \
+    code/locator.h \
+    code/log.h \
+    code/jeeves.h \
+    code/interrogator.h \
+    code/build.h \
+    code/statusscreen.h \
+    code/builds.h \
+    code/builder.h
+
+RESOURCES += \
+    jeeves.qrc \
 
 macx {
     # Mac-specific if you are compiling, using gcc. Update these two lines to match your target Mac OS SDK

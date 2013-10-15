@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/linux-logo.jpg</file>
+        <file>resources/osx_logo.jpg</file>
+        <file>resources/windows-logo.png</file>
+        <file>resources/undefined.png</file>
+    </qresource>
+</RCC>
