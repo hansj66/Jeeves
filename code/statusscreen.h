@@ -59,6 +59,7 @@ private:
     int m_lineHeight;
     int m_discoveredBuilds;
     int m_refreshInterval;
+    int m_windowHeight;
 
     void RefreshLayout(int nCount);
     void RefreshData();

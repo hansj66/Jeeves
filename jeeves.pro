@@ -43,8 +43,8 @@ RESOURCES += \
 
 macx {
     # Mac-specific if you are compiling, using gcc. Update these two lines to match your target Mac OS SDK
-    QMAKE_MACOSX_DEPLOYMENT_TARGET=10.7
-    QMAKE_MAC_SDK = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk
+    QMAKE_MACOSX_DEPLOYMENT_TARGET=10.8
+    QMAKE_MAC_SDK = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk
 }
 
 macx-clang {

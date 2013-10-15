@@ -28,7 +28,12 @@ StatusScreen::StatusScreen(QHostAddress broadcastAddress, QWidget *parent) :
 {
     m_started = QDateTime::currentDateTime();
     InitBroadcast(broadcastAddress);
+    setWindowFlags(windowFlags() | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
+    setWindowState(windowState() | Qt::WindowFullScreen);
+
+
     show();
+    m_windowHeight = height();
 }
 
 
@@ -80,7 +85,7 @@ void StatusScreen::RefreshLayout(int nCount)
         m_DisplayLines.clear();
         m_Icons.clear();
 
-        m_lineHeight = (height()-100) / nCount;
+        m_lineHeight = (m_windowHeight-100) / nCount;
 
         QVBoxLayout * layout = new QVBoxLayout();
         for (int i=0; i<nCount; i++)
@@ -135,13 +140,14 @@ void StatusScreen::UpdateStyleSheets(int nCount)
     if (0 == nCount)
         return;
 
-    m_lineHeight = (height()-100) / nCount;
+    m_lineHeight = (m_windowHeight-100) / nCount;
 
      for (int i=0; i<nCount; i++)
      {
          m_Icons.at(i)->setStyleSheet(QString("QLabel {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF); font-size: 24pt; font-weight:bold;}").arg(m_lineHeight));
          m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #555555, stop: 1 #FFFFFF); font-size: 24pt; font-weight:bold;}").arg(m_lineHeight));
      }
+     showMaximized();
 }
 
 void StatusScreen::RefreshUpTime()
@@ -179,4 +185,5 @@ void StatusScreen::RefreshData()
     }
 
     m_builds.RemoveStale();
+    showMaximized();
  }
