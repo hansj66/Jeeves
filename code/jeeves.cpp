@@ -21,6 +21,16 @@
 Jeeves::Jeeves(QHostAddress broadcastAddress, int &argc, char **argv) :
     QApplication(argc, argv)
 {
-   new StatusScreen(broadcastAddress);
+
+
+    m_locater = new Locator(broadcastAddress, this);
+    m_builders = new Builders();
+
+    connect(m_locater, SIGNAL(buildersDisapeared(QStringList)),m_builders,SLOT(OnRemoveBuilders(QStringList)));
+    connect(m_locater, SIGNAL(buildersFound(QStringList)),m_builders,SLOT(OnAddBuilders(QStringList)));
+
+    new StatusScreen(m_builders);
+
+
  }
 

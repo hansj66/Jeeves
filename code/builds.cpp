@@ -24,184 +24,214 @@ Builds::Builds()
 {
 }
 
-void Builds::UpdateLastHeardFrom(QString key, QDateTime time)
+//void Builds::UpdateLastHeardFrom(QString key, QDateTime time)
+//{
+//    m_builds[key].LastHeardFrom(time);
+//}
+
+//void Builds::UpdateName(QString key, QString name)
+//{
+//      m_builds[key].Name(name);
+//}
+
+//void Builds::UpdateUrl(QString key, QString url)
+//{
+//    m_builds[key].Url(url);
+//}
+
+//void Builds::UpdateNumber(QString key, QString number)
+//{
+//    m_builds[key].Number(number);
+//}
+
+//void Builds::UpdateBuildable(QString key, QString buildable)
+//{
+//    m_builds[key].Buildable(buildable);
+//}
+
+
+//void Builds::UpdateCulprits(QString key, QStringList culprits)
+//{
+//    m_builds[key].Culprits(culprits);
+//}
+
+//void Builds::UpdateBuilding(QString key, QString building)
+//{
+//    m_builds[key].Building(building);
+//}
+
+
+//void Builds::UpdateDescription(QString key, QString description)
+//{
+//    m_builds[key].setDescription(description);
+//}
+
+//int Builds::RemoveStale()
+//{
+//    int removed = 0;
+
+//    QMap<QString, Build>::iterator it;
+
+//    for (it=m_builds.begin(); it != m_builds.end();)
+//    {
+//        if (it.value().LastHeardFrom().addSecs(300) < QDateTime::currentDateTime())
+//        {
+//            it = m_builds.erase(it);
+//            removed++;
+//        }
+//        else
+//        {
+//            ++it;
+//        }
+//    }
+//    return removed;
+//}
+
+//int Builds::Excluded()
+//{
+//    QMapIterator<QString, Build> i(m_builds);
+//    int count= 0;
+//    while (i.hasNext())
+//    {
+//        i.next();
+//        if (IsFiltered(i.value()))
+//            count++;
+//    }
+//    return count;
+//}
+
+//int Builds::Count()
+//{
+//    return m_builds.count();
+//}
+
+//bool Builds::IsFiltered(Build b)
+//{
+//    return (!b.IsBuildable());
+//}
+
+
+
+//bool Builds::Failed(int index)
+//{
+//    return m_builds.values().at(index).Failed();
+//}
+
+//bool Builds::Success(int index)
+//{
+//    return m_builds.values().at(index).Success();
+//}
+
+//bool Builds::IsBuilding(int index)
+//{
+//    return m_builds.values().at(index).IsBuilding();
+//}
+
+//QString Builds::StatusMessage(int index)
+//{
+//    return m_builds.values().at(index).ToDisplayString();
+//}
+
+bool Builds::AnyFailed() const
 {
-    m_builds[key].LastHeardFrom(time);
-}
-
-void Builds::UpdateName(QString key, QString name)
-{
-      m_builds[key].Name(name);
-}
-
-void Builds::UpdateUrl(QString key, QString url)
-{
-    m_builds[key].Url(url);
-}
-
-void Builds::UpdateNumber(QString key, QString number)
-{
-    m_builds[key].Number(number);
-}
-
-void Builds::UpdateBuildable(QString key, QString buildable)
-{
-    m_builds[key].Buildable(buildable);
-}
-
-void Builds::UpdateResult(QString key, QString result)
-{
-    m_builds[key].Result(result);
-}
-
-void Builds::UpdateCulprits(QString key, QStringList culprits)
-{
-    m_builds[key].Culprits(culprits);
-}
-
-void Builds::UpdateBuilding(QString key, QString building)
-{
-    m_builds[key].Building(building);
-}
-
-
-void Builds::UpdateDescription(QString key, QString description)
-{
-    m_builds[key].Description(description);
-}
-
-int Builds::RemoveStale()
-{
-    int removed = 0;
-
-    QMap<QString, Build>::iterator it;
-
-    for (it=m_builds.begin(); it != m_builds.end();)
+    foreach(Build build, m_builds)
     {
-        if (it.value().LastHeardFrom().addSecs(300) < QDateTime::currentDateTime())
-        {
-            it = m_builds.erase(it);
-            removed++;
-        }
-        else
-        {
-            ++it;
-        }
-    }
-    return removed;
-}
-
-int Builds::Excluded()
-{
-    QMapIterator<QString, Build> i(m_builds);
-    int count= 0;
-    while (i.hasNext())
-    {
-        i.next();
-        if (IsFiltered(i.value()))
-            count++;
-    }
-    return count;
-}
-
-int Builds::Count()
-{
-    return m_builds.count();
-}
-
-bool Builds::IsFiltered(Build b)
-{
-    return (!b.IsBuildable());
-}
-
-QStringList Builds::WaitMessages()
-{
-    QStringList messages;
-
-    QMapIterator<QString, Build> i(m_builds);
-    while (i.hasNext())
-    {
-        i.next();
-        if (!IsFiltered(i.value()))
-            messages.append(QString("Waiting for response from : %1").arg(i.value().Url()));
-    }
-    return messages;
-}
-
-
-bool Builds::Failed(int index)
-{
-    return m_builds.values().at(index).Failed();
-}
-
-bool Builds::Success(int index)
-{
-    return m_builds.values().at(index).Success();
-}
-
-bool Builds::IsBuilding(int index)
-{
-    return m_builds.values().at(index).IsBuilding();
-}
-
-QString Builds::StatusMessage(int index)
-{
-    return m_builds.values().at(index).ToDisplayString();
-}
-
-void Builds::Append(QString key, Build b)
-{
-    m_builds[key] = b;
-}
-
-Build::TARGET_OS Builds::Target(int index)
-{
-    return m_builds.values().at(index).Target();
-}
-
-Builds Builds::Filtered()
-{
-    Builds filtered;
-
-    QMapIterator<QString, Build> it(m_builds);
-    int i= 0;
-    while (it.hasNext())
-    {
-        it.next();
-
-        if (!IsFiltered(it.value()))
-            filtered.Append(it.key(), it.value());
-        i++;
-    }
-
-    return filtered;
-}
-
-bool Builds::Failed()
-{
-    Builds filtered = Filtered();
-    for (int i=0; i<filtered.Count(); i++)
-    {
-        if (filtered.Failed(i))
+        if(build.Failed())
             return true;
     }
     return false;
 }
 
 
-QString Builds::ToString()
+void Builds::Append(Build  build)
 {
-    QString result;
+    m_builds.append( build );
+}
 
-    QMapIterator<QString, Build> it(m_builds);
-    int i= 0;
-    while (it.hasNext())
+void Builds::Append(QList<Build> builds)
+{
+    for(int i = 1; i < builds.count(); ++i)
     {
-        it.next();
-        result.append(it.value().ToString());
+        Append(builds.at(i));
+    }
+}
+
+
+Build Builds::At(int index) const
+{
+    return m_builds.at(index);
+}
+
+int Builds::Count() const
+{
+    return m_builds.count();
+}
+
+QStringList Builds::WaitMessages()
+{
+    QStringList messages;
+
+    foreach(Build build, m_builds)
+    {
+        messages.append(QString("Waiting for response from : %1").arg(build.Url()));
     }
 
-    return result;
+    return messages;
 }
+
+
+//void Builds::Append(QString key, Build b)
+//{
+//    m_builds[key] = b;
+//}
+
+//Build::TARGET_OS Builds::Target(int index)
+//{
+//    return m_builds.values().at(index).Target();
+//}
+
+//Builds Builds::Filtered()
+//{
+//    Builds filtered;
+
+//    QMapIterator<QString, Build> it(m_builds);
+//    int i= 0;
+//    while (it.hasNext())
+//    {
+//        it.next();
+
+//        if (!IsFiltered(it.value()))
+//            filtered.Append(it.key(), it.value());
+//        i++;
+//    }
+
+//    return filtered;
+//}
+
+//bool Builds::Failed()
+//{
+//    Builds filtered = Filtered();
+//    for (int i=0; i<filtered.Count(); i++)
+//    {
+//        if (filtered.Failed(i))
+//            return true;
+//    }
+//    return false;
+//}
+
+
+//QString Builds::ToString()
+//{
+//    QString result;
+
+//    QMapIterator<QString, Build> it(m_builds);
+//    while (it.hasNext())
+//    {
+//        it.next();
+//        result.append(it.value().ToString());
+//    }
+
+//    return result;
+//}
 
 

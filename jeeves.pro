@@ -20,11 +20,13 @@ SOURCES += code/main.cpp \
     code/locator.cpp \
     code/log.cpp \
     code/jeeves.cpp \
-    code/interrogator.cpp \
+    code/FileDownloader.cpp \
     code/build.cpp \
     code/statusscreen.cpp \
-    code/builds.cpp \
-    code/builder.cpp
+  #  code/builds.cpp \
+    code/builder.cpp \
+    code/builders.cpp \
+  #  code/HtmlGenerator.cpp
 
 HEADERS += \
     code/errors.h \
@@ -32,19 +34,21 @@ HEADERS += \
     code/locator.h \
     code/log.h \
     code/jeeves.h \
-    code/interrogator.h \
+    code/FileDownloader.h \
     code/build.h \
     code/statusscreen.h \
-    code/builds.h \
-    code/builder.h
+   # code/builds.h \
+    code/builder.h \
+    code/builders.h \
+  #  code/HtmlGenerator.h
 
 RESOURCES += \
     jeeves.qrc \
 
 macx {
     # Mac-specific if you are compiling, using gcc. Update these two lines to match your target Mac OS SDK
-    QMAKE_MACOSX_DEPLOYMENT_TARGET=10.7
-    QMAKE_MAC_SDK = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk
+    QMAKE_MACOSX_DEPLOYMENT_TARGET=10.8
+    QMAKE_MAC_SDK = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk
 }
 
 macx-clang {

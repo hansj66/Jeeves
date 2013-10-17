@@ -23,7 +23,7 @@
 #include <QTimer>
 
 #include "locator.h"
-#include "interrogator.h"
+#include "builders.h"
 
 class Jeeves : public QApplication
 {
@@ -31,6 +31,12 @@ class Jeeves : public QApplication
 
 public:
     Jeeves(QHostAddress broadcastAddress, int &argc, char **argv);
+
+
+private:
+    Builders *  m_builders;
+    Locator * m_locater;
+
 
 };
 

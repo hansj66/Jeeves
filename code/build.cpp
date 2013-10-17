@@ -16,12 +16,125 @@
 */
 
 #include <QDebug>
+#include <QXmlStreamReader>
 #include "build.h"
+#include "log.h"
 
 Build::Build() :
     m_lastHeardFrom(QDateTime::currentDateTime())
 {
+   m_isBuilding = false;
+   m_isBuildable = false;
 }
+
+
+Build::Build(QDomNode node) :
+    m_lastHeardFrom(QDateTime::currentDateTime())
+{
+    m_isBuilding = false;
+    m_isBuildable = false;
+
+    while(!node.isNull())
+    {
+        QDomElement element = node.toElement();
+        if(!element.isNull())
+        {
+            if(element.tagName() == "name")
+               setName(element.text());
+            else if(element.tagName() == "url")
+            {
+                setUrl(element.text());
+            }
+            else if(element.tagName() == "buildable")
+                setBuildable(element.text().toLower() == "true");
+            else if(element.tagName() == "lastBuild")
+            {
+                QDomNode lastBuildNode = node.firstChild();
+                while(!lastBuildNode.isNull())
+                {
+                    QDomElement lastBuildElement = lastBuildNode.toElement();
+                    if(lastBuildElement.tagName() == "number")
+                       setNumber(lastBuildElement.text());
+
+                    lastBuildNode = lastBuildNode.nextSibling();
+                }
+
+            }
+
+        }
+        node = node.nextSibling();
+    }
+}
+
+
+bool Build::parseXml(QString xmlString)
+{
+    if(xmlString.isEmpty())
+        return false;
+
+    QDomDocument doc;
+    if (!doc.setContent(xmlString))
+    {
+        Log::Instance()->Error(QString("Bummer ! Looks like the build machine URL : %1 - is complete garbage.").arg(xmlString));
+        return false;
+    }
+    QDomElement root = doc.documentElement();
+    if(root.tagName() != "freeStyleProject")
+        return false;
+
+
+    setResult("");
+    setBuildable("");
+    setCulprits(QStringList());
+
+    QDomNode nodeParent = root.firstChild();
+    while(!nodeParent.isNull())
+    {
+        QDomElement element = nodeParent.toElement();
+        if(!element.isNull())
+        {
+            if(element.tagName() == "lastBuild")
+            {
+                QDomNode lastBuildNode = nodeParent.firstChild();
+                while(!lastBuildNode.isNull())
+                {
+                    QDomElement lastBuildElement = lastBuildNode.toElement();
+                    if(lastBuildElement.tagName() == "result")
+                       setResult(lastBuildElement.text());
+                    else if(lastBuildElement.tagName() == "building")
+                        setBuilding(lastBuildElement.text().toLower() == "true");
+                    else if(lastBuildElement.tagName() == "culprit")
+                    {
+                        QDomNode culpritNode = lastBuildNode.firstChild();
+                        while(!culpritNode.isNull())
+                        {
+                            QDomElement culpritElement = culpritNode.toElement();
+                            QStringList culprits;
+                            if(culpritElement.tagName() == "fullName")
+                               culprits << culpritElement.text();
+                            setCulprits(culprits);
+                            culpritNode = culpritNode.nextSibling();
+                        }
+                    }
+
+                    lastBuildNode = lastBuildNode.nextSibling();
+                }
+
+            }
+            else if(element.tagName() == "description")
+            {
+                setDescription(element.text());
+            }
+
+        }
+
+        nodeParent = nodeParent.nextSibling();
+    }
+    setLastHeardFrom(QDateTime::currentDateTime());
+    return true;
+
+}
+
 
 QString Build::ToString() const
 {
@@ -68,7 +181,7 @@ bool Build::IsConsistent() const
     return true;
 }
 
-void Build::Description(QString description)
+void Build::setDescription(QString description)
 {
     m_description = description;
 
@@ -79,6 +192,3 @@ void Build::Description(QString description)
     if (m_description.toLower().contains("[target=linux]"))
         m_target = Linux;
 }
-
-
-

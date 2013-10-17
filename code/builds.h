@@ -27,36 +27,40 @@ class Builds
 {
 public:
     explicit Builds();
-    void UpdateLastHeardFrom(QString key, QDateTime time);
-    void UpdateName(QString key, QString name);
-    void UpdateUrl(QString key, QString url);
-    void UpdateNumber(QString key, QString number);
-    void UpdateBuildable(QString key, QString buildable);
-    void UpdateResult(QString key, QString result);
-    void UpdateCulprits(QString key, QStringList culprits);
-    void UpdateBuilding(QString key, QString building);
-    void UpdateDescription(QString key, QString description);
-    int RemoveStale();
-    QString ToString();
 
+
+    void Append(Build build);
+    void Append(QList<Build> builds);
+    bool AnyFailed() const;
+    Build At(int index) const;
+    int Count() const;
     QStringList WaitMessages();
+//    void UpdateLastHeardFrom(QString key, QDateTime time);
+//    void UpdateName(QString key, QString name);
+//    void UpdateUrl(QString key, QString url);
+//    void UpdateNumber(QString key, QString number);
+//    void UpdateBuildable(QString key, QString buildable);
+//    void UpdateCulprits(QString key, QStringList culprits);
+//    void UpdateBuilding(QString key, QString building);
+//    void UpdateDescription(QString key, QString description);
+//    int RemoveStale();
+//    QString ToString();
 
-    int Count();
-    int Excluded();
 
-    Builds Filtered();
+//    int Count();
+//    int Excluded();
+
+//    Builds Filtered();
     bool Failed();
 
-    bool Failed(int index);
-    bool Success(int index);
-    bool IsBuilding(int index);
-    QString StatusMessage(int index);
-    Build::TARGET_OS Target(int index);
+//    bool Failed(int index);
+//    bool Success(int index);
+//    bool IsBuilding(int index);
 
 private:
-    QMap<QString, Build>  m_builds;
-    void Append(QString key, Build b);
-    bool IsFiltered(Build b);
+    QList< Build  >  m_builds;
+    //void Append( Build b);
+    //bool IsFiltered(Build b);
 };
 
 #endif // BUILDS_H

@@ -31,16 +31,21 @@ public:
     explicit Locator(QHostAddress & broadcastAddress, QObject *parent = 0);
     QStringList BuildMachineAPIs();
 
+signals:
+    void buildersDisapeared(QStringList url);
+    void buildersFound(QStringList url);
+
+
 private:
     void clear();
 
-
-
     QUdpSocket *    m_udpSocket;
-    QList<Builder *>  m_builders;
     QHostAddress    m_broadcastAddress;
-
+    QSet<QString>   m_knownBuildMachines;
+    QTimer      * m_broadcastTimer;
+    QString GetUrl(QString datagram);
     QString GetAPI(QString buildMachineURL);
+    void CheckForBuilderChanges(QSet<QString> buildMachineURLs);
 
 signals:
     void finished();

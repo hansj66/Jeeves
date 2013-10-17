@@ -17,15 +17,15 @@
 
 #ifndef BUILD_H
 #define BUILD_H
-
 #include <QString>
 #include <QStringList>
 #include <QTime>
+#include <QDomNode>
+#include "FileDownloader.h"
 
 class Build
 {
 public:
-
     typedef enum {
         Undefined,
         Windows,
@@ -34,44 +34,52 @@ public:
     } TARGET_OS;
 
     Build();
+    Build(QDomNode node);
     QString ToString() const;
     QString ToDisplayString() const;
 
+    QString Description() const { return m_description; }
     QString Name() const  { return m_name; }
     QString Url() const { return m_url; }
 
-    void Number(QString number) { m_number = number; }
-    void Result(QString result) { m_result = result; }
-    QString Result() const { return m_result; }
     bool Failed() const { return m_result == "FAILURE"; }
     bool Success() const { return m_result == "SUCCESS"; }
     void Timestamp(QString timestamp) {m_timestamp = timestamp; }
-    void Culprits(QStringList culprits) {m_culprits = culprits; }
-    void Name(QString name) { m_name=name; }
+
     QString Name() { return m_name.replace("%20", " ");}
-    void Url(QString url) { m_url=url; }
+
     void AddExcuse(QString excuse) { m_excuses.append(excuse); }
-    void LastHeardFrom(QDateTime time) { m_lastHeardFrom = time; }
+
     QDateTime LastHeardFrom() const { return m_lastHeardFrom; }
-    void Building(QString isBuilding) { m_isBuilding = isBuilding; }
-    bool IsBuilding() const { return m_isBuilding == "true"; }
-    void Buildable(QString isBuildable)  { m_isBuildable = isBuildable; }
-    bool IsBuildable() const { return m_isBuildable == "true"; }
-    void Description(QString description);
-    QString Description() const { return m_description; }
+
+    bool IsBuilding() const { return m_isBuilding; }
+    bool IsBuildable() const { return m_isBuildable; }
+
     TARGET_OS Target() const { return m_target;}
 
     bool IsConsistent() const;
     QString MachineShortName() const;
 
- private:
+    bool parseXml(QString xmlString);
+private:
+
+    void setBuildable(bool isBuildable)  { m_isBuildable = isBuildable; }
+    void setBuilding(bool isBuilding) { m_isBuilding = isBuilding; }
+    void setCulprits(QStringList culprits) {m_culprits = culprits; }
+    void setDescription(QString description);
+    void setLastHeardFrom(QDateTime time) { m_lastHeardFrom = time; }
+    void setName(QString name) { m_name=name; }
+    void setNumber(QString number) { m_number = number; }
+    void setResult(QString result) { m_result = result; }
+    void setUrl(QString url) { m_url=url + "api/xml?depth=1"; }
+
     QString m_name;
     QString m_url;
     QString m_number;
     QString m_result;
     QString m_timestamp;
-    QString m_isBuilding;
-    QString m_isBuildable;
+    bool m_isBuilding;
+    bool m_isBuildable;
     QStringList m_culprits;
     QStringList m_excuses;
     QDateTime m_lastHeardFrom;
