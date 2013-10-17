@@ -30,7 +30,7 @@ Builders::Builders()
 
     m_refreshTimer = new QTimer(this);
     connect(m_refreshTimer, SIGNAL(timeout()), this, SLOT(refreshBuilds()));
-    m_refreshTimer->start(3000);
+    m_refreshTimer->start(10000);
 }
 
 

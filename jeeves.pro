@@ -59,4 +59,5 @@ win32-msvc {
 
 OTHER_FILES += \
     LICENSE.TXT \
-    README.md
+    README.md \
+    Jeeves.css

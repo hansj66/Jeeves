@@ -18,6 +18,7 @@ private:
 
 signals:
 
+
 private slots:
     void RefreshHtml();
 

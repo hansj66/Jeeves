@@ -12,7 +12,7 @@ HtmlGenerator::HtmlGenerator(Builders * builders, QObject * parent) :
 
     m_refreshTimer = new QTimer(this);
     connect(m_refreshTimer, SIGNAL(timeout()), this, SLOT(RefreshHtml()));
-    m_refreshTimer->start(4000);
+    m_refreshTimer->start(3000);
 }
 
 void HtmlGenerator::RefreshHtml()
@@ -25,15 +25,20 @@ void HtmlGenerator::RefreshHtml()
     if(builds.count() == 0) return;
 
     QTextStream out(&outfile);
-    out << "<HEAD>";
-    out << "<title>Jeeves is awesome</title>";
-    out << "<meta http-equiv=\"refresh\" content=\"2\" >";
+    out << "<!DOCTYPE html>\n";
+    out << "<html lang=\"en-US\">\n";
+
+
+    out << "<HEAD>\n";
+    out << "<title>Jeeves is awesome</title>\n";
+    out << "<meta http-equiv=\"refresh\" content=\"2\" >\n";
+    out << "<link rel=\"stylesheet\" type=\"text/css\" href=\"jeeves.css\">";
 
     out << "</HEAD>\n";
     out << "<BODY>\n";
 
 
-    out << "<TABLE border=\"1\"   width=\"100%\" height=\"100%\">";
+    out << "<TABLE>\n";
 
     for(int i = 0; i < builds.count();++i)
     {
@@ -62,13 +67,15 @@ void HtmlGenerator::RefreshHtml()
                 imageFile = "undefined.png";
         }
 
-        out << "<TR>" << QString("<TD width=\"75\" height=\"75\"  bgcolor=\"white\">") << QString("<img src=\"%1\"  width=\"75\" height=\"75\"  >").arg(imageFile)  << "</TD>";
-        out << QString("<TD bgcolor=\"%1\" style=\"vertical-align:middle\">").arg(color) << "<b><font size=\"24\">  " << build->ToDisplayString() << "</font><b></TD>";
+        out << "<TR>" << QString("<TD bgcolor=\"white\">") << QString("<img src=\"%1\"  width=\"75\" height=\"75\" alt=\"build machine\"  >").arg(imageFile)  << "</TD>";
+        out << QString("<TD bgcolor=\"%1\">").arg(color) << "<H1>" << build->ToDisplayString() << "</H1></TD>";
         out << "</TR>\n";
     }
 
-    out << "</TABLE></BODY>\n";
+    out << "</TABLE>\n</BODY>\n</html>\n";
 
     Log::Instance()->Status(QDateTime::currentDateTime().toString(), QString("Time: "));
     outfile.close();
 }
+
+

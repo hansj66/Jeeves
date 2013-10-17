@@ -33,7 +33,7 @@ Locator::Locator(QHostAddress & broadcastAddress, QObject *parent) :
     run();
     m_broadcastTimer = new QTimer(this);
     connect(m_broadcastTimer, SIGNAL(timeout()), this, SLOT(run()));
-    m_broadcastTimer->start(30000);
+    m_broadcastTimer->start(60000);
 
 }
 
