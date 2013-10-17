@@ -33,17 +33,24 @@ public:
         Linux
     } TARGET_OS;
 
+    typedef enum {
+        SUCCESS,
+        FAILURE,
+        BUILDING,
+        ABORTED,
+        UNKNOWN
+    } STATUS;
+
+
     Build();
     Build(QDomNode node);
-    QString ToString() const;
     QString ToDisplayString() const;
 
     QString Description() const { return m_description; }
     QString Name() const  { return m_name; }
     QString Url() const { return m_url; }
-
-    bool Failed() const { return m_result == "FAILURE"; }
-    bool Success() const { return m_result == "SUCCESS"; }
+    bool Failed() const { return m_status == FAILURE; }
+    STATUS Status() const { return m_status; }
     void Timestamp(QString timestamp) {m_timestamp = timestamp; }
 
     QString Name() { return m_name.replace("%20", " ");}
@@ -52,7 +59,6 @@ public:
 
     QDateTime LastHeardFrom() const { return m_lastHeardFrom; }
 
-    bool IsBuilding() const { return m_isBuilding; }
     bool IsBuildable() const { return m_isBuildable; }
 
     TARGET_OS Target() const { return m_target;}
@@ -64,21 +70,20 @@ public:
 private:
 
     void setBuildable(bool isBuildable)  { m_isBuildable = isBuildable; }
-    void setBuilding(bool isBuilding) { m_isBuilding = isBuilding; }
     void setCulprits(QStringList culprits) {m_culprits = culprits; }
     void setDescription(QString description);
     void setLastHeardFrom(QDateTime time) { m_lastHeardFrom = time; }
     void setName(QString name) { m_name=name; }
     void setNumber(QString number) { m_number = number; }
-    void setResult(QString result) { m_result = result; }
     void setUrl(QString url) { m_url=url + "api/xml?depth=1"; }
+    void setResult(QString result);
+    void setStatus(STATUS status) { m_status = status;}
 
     QString m_name;
     QString m_url;
     QString m_number;
-    QString m_result;
+    STATUS m_status;
     QString m_timestamp;
-    bool m_isBuilding;
     bool m_isBuildable;
     QStringList m_culprits;
     QStringList m_excuses;

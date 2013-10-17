@@ -35,7 +35,7 @@ Interrogator::~Interrogator()
 {
     disconnect(m_accessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(OnRequestReceived(QNetworkReply*)));
     delete m_accessManager;
-    m_accessManager = nullptr;
+    m_accessManager = NULL;
 }
 
 void Interrogator::Request(QStringList apiList)

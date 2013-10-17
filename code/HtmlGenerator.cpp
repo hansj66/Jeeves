@@ -17,7 +17,7 @@ HtmlGenerator::HtmlGenerator(Builders * builders, QObject * parent) :
 
 void HtmlGenerator::RefreshHtml()
 {
-    QFile outfile("./Jeeves.html");
+    QFile outfile("./index.html");
     if (!outfile.open(QIODevice::WriteOnly | QIODevice::Text))
             return;
 
@@ -46,12 +46,26 @@ void HtmlGenerator::RefreshHtml()
 
 
         QString color;
-        if (build->IsBuilding())
-           color = "yellow";
-        else if (build->Failed())
-           color = "red";
-        else if (build->Success())
-           color = "66CCFF";
+
+        Build::STATUS status = build->Status();
+        switch (status)
+        {
+        case Build::BUILDING:
+            color = "yellow";
+            break;
+        case Build::FAILURE:
+            color = "red";
+            break;
+        case Build::SUCCESS:
+            color = "66CCFF";
+            break;
+        case Build::ABORTED:
+            color = "grey";
+            break;
+        default:
+            color = "white";
+            break;
+        }
 
         QString imageFile;
         Build::TARGET_OS os = builds.at(i)->Target();

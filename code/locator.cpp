@@ -117,7 +117,7 @@ QString Locator::GetUrl(QString datagram)
     QDomNodeList elements = root.elementsByTagName("url");
     if (1 != elements.count())
     {
-        Log::Instance()->Error(QString("Dang ! I was hoping for a single element. Instead we got %1. This probably should not happen...").arg(elements.count()));
+       // Log::Instance()->Error(QString("Dang ! I was hoping for a single element. Instead we got %1. This probably should not happen...").arg(elements.count()));
         return QString();
     }
 

@@ -162,15 +162,26 @@ void StatusScreen::RefreshData()
     for(int i = 0; i < builds.count();++i)
     {
         Build * build = builds.at(i);
-        if (build->IsBuilding())
-            m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; color: black; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFCC, stop: 1 #FFFF00); font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
 
-        else if (build->Failed())
-            m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FF5555, stop: 1 #FF0000); font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
-
-        else if (build->Success())
-              m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #AAAAFF, stop: 1 #0000FF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
-
+        Build::STATUS status = build->Status();
+        switch (status)
+        {
+        case Build::BUILDING:
+                m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; color: black; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFCC, stop: 1 #FFFF00); font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
+                break;
+        case Build::FAILURE:
+                m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FF5555, stop: 1 #FF0000); font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
+                break;
+        case Build::SUCCESS:
+                m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #AAAAFF, stop: 1 #0000FF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
+                break;
+        case Build::ABORTED:
+                m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #666666, stop: 1 #666666);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
+                break;
+        default:
+                m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #FFFFFF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
+                break;
+        }
         m_DisplayLines.at(i)->setText(build->ToDisplayString());
     }
 

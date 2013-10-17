@@ -23,7 +23,7 @@
 Build::Build() :
     m_lastHeardFrom(QDateTime::currentDateTime())
 {
-   m_isBuilding = false;
+   m_status = UNKNOWN;
    m_isBuildable = false;
 }
 
@@ -31,7 +31,6 @@ Build::Build() :
 Build::Build(QDomNode node) :
     m_lastHeardFrom(QDateTime::currentDateTime())
 {
-    m_isBuilding = false;
     m_isBuildable = false;
 
     while(!node.isNull())
@@ -83,7 +82,6 @@ bool Build::parseXml(QString xmlString)
         return false;
 
 
-    setResult("");
     setBuildable("");
     setCulprits(QStringList());
 
@@ -100,9 +98,11 @@ bool Build::parseXml(QString xmlString)
                 {
                     QDomElement lastBuildElement = lastBuildNode.toElement();
                     if(lastBuildElement.tagName() == "result")
+                    {
                        setResult(lastBuildElement.text());
-                    else if(lastBuildElement.tagName() == "building")
-                        setBuilding(lastBuildElement.text().toLower() == "true");
+                    }
+                    else if(lastBuildElement.tagName() == "building" && lastBuildElement.text().toLower() == "true")
+                        setStatus(BUILDING);
                     else if(lastBuildElement.tagName() == "culprit")
                     {
                         QDomNode culpritNode = lastBuildNode.firstChild();
@@ -136,18 +136,25 @@ bool Build::parseXml(QString xmlString)
 }
 
 
-QString Build::ToString() const
+
+void Build::setResult(QString result)
 {
-    QString build = QString("\n\n\tname=%1\n\tlast build number=%2\n\turl=%3\n\tResult=%4\n\tAlive=%5\n\tIs building=%6\n\tIs buildable=%7\n").arg(Name()).arg(m_number).arg(m_url).arg(m_result).arg(m_lastHeardFrom.toString()).arg(m_isBuilding).arg(m_isBuildable);
-
-    if (m_culprits.length() == 0)
-        return build;
-
-    build.append("\tculprits=");
-    for (int i=0; i<m_culprits.length(); i++)
-        build.append(QString("%1,").arg(m_culprits.at(i)));
-    return build.left(build.length()-1);
+    if(result == "ABORTED")
+    {
+         setStatus(ABORTED);
+    }
+    else if(result == "SUCCESS")
+    {
+         setStatus(SUCCESS);
+    }
+    else if(result == "FAILURE")
+    {
+        setStatus(FAILURE);
+    }
+    else
+        setStatus(UNKNOWN);
 }
+
 
 QString Build::ToDisplayString() const
 {
