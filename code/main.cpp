@@ -44,7 +44,9 @@ int main(int argc, char *argv[])
 {
     const QString logParam = "log=";
     const QString addressParam = "address=";
+    const QString modeParam = "mode=";
 
+    Jeeves::Mode mode = Jeeves::GUI;
     QString addressArg;
 
     for (int i=1; i<argc; i++)
@@ -58,6 +60,15 @@ int main(int argc, char *argv[])
         else if (addressParam == a.left(addressParam.length()).toLower())
         {
             addressArg = a.mid(addressParam.length());
+        }
+        else if (modeParam == a.left(modeParam.length()).toLower())
+        {
+            if(a.mid(modeParam.length()).toUpper() == "HTML")
+                mode = Jeeves::HTML;
+            else if (a.mid(modeParam.length()).toUpper() == "GUI")
+                mode = Jeeves::GUI;
+            else
+                return Error(UNRECOGNIZED_ARGUMENT, QString("Unrecognized command line argument: %1").arg(argv[i]));
         }
         else
         {
@@ -73,7 +84,7 @@ int main(int argc, char *argv[])
 
     std::cout << "\nHi ! I am Jeeves. Hang on...\n";
 
-    Jeeves jeeves(broadcastAddress, argc, argv);
+    Jeeves jeeves(broadcastAddress, mode, argc, argv);
 
     return jeeves.exec();
 }

@@ -151,7 +151,7 @@ QString Build::ToString() const
 
 QString Build::ToDisplayString() const
 {
-    QString build = QString("%1:%2 (Build #%3) ").arg(MachineShortName()).arg(Name()).arg(m_number);
+    QString build = QString("%1: %2 (Build #%3) ").arg(MachineShortName()).arg(Name()).arg(m_number);
 
     if (m_culprits.length() == 0)
         return build;
@@ -171,7 +171,7 @@ QString Build::ToDisplayString() const
 
 QString Build::MachineShortName() const
 {
-    return m_url.right(m_url.length()-7).split("/").at(0).split(":").at(0);
+    return m_url.right(m_url.length()-7).split("/").at(0).split(":").at(0).split(".").at(0);
 }
 
 bool Build::IsConsistent() const

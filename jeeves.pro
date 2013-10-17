@@ -23,10 +23,9 @@ SOURCES += code/main.cpp \
     code/FileDownloader.cpp \
     code/build.cpp \
     code/statusscreen.cpp \
-  #  code/builds.cpp \
     code/builder.cpp \
     code/builders.cpp \
-  #  code/HtmlGenerator.cpp
+    code/HtmlGenerator.cpp
 
 HEADERS += \
     code/errors.h \
@@ -37,10 +36,9 @@ HEADERS += \
     code/FileDownloader.h \
     code/build.h \
     code/statusscreen.h \
-   # code/builds.h \
     code/builder.h \
     code/builders.h \
-  #  code/HtmlGenerator.h
+    code/HtmlGenerator.h
 
 RESOURCES += \
     jeeves.qrc \
