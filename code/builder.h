@@ -27,21 +27,12 @@ class Builder
 {
 public:
     Builder();
-    Builder(QString xml);
-    bool parseXml(QString xml);
-    QString API();
-    bool isValid() { return m_valid;}
+    Builder(const QByteArray &xml);
+    bool parseXml(const QByteArray &xml);
     Builds builds() const;
     int RemoveStale();
 
 private:
-    QString rootUrl(QString xml);
-    QString tagData(QString tag);
-
-    QString m_XML;
-    QString m_Target;
-    bool m_valid;
-    //Builds m_builds;
 
     Builds m_builds;
 };

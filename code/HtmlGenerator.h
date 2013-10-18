@@ -20,11 +20,10 @@ signals:
 
 
 private slots:
-    void RefreshHtml();
+    void RefreshHtml() const;
 
 private:
     Builders * m_builders;
-    QTimer * m_refreshTimer;
 
 };
 

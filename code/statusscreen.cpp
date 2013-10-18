@@ -28,9 +28,7 @@ StatusScreen::StatusScreen(Builders *  builders, QWidget *parent) :
 {
     m_started = QDateTime::currentDateTime();
 
-    m_refreshTimer = new QTimer(this);
-    connect(m_refreshTimer, SIGNAL(timeout()), this, SLOT(Refresh()));
-    m_refreshTimer->start(4000);
+    connect(m_builders, SIGNAL(updated()), this, SLOT(Refresh()));
 
 
     setWindowFlags(windowFlags() | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);

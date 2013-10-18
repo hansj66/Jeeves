@@ -32,10 +32,12 @@ class Builders : public QObject
     Q_OBJECT
 public:
     Builders();
-    Builds builds();
+    Builds builds() const;
     Build *build(QString url) ;
     int RemoveStale();
 
+signals:
+    void updated();
 
 public slots:
     void Add(QString url);
@@ -45,18 +47,14 @@ public slots:
 
 
 private:
-    QString rootUrl(QString xml);
-    QString tagData(QString tag);
 
-    QString m_API;
-    QString m_XML;
-    QString m_Target;
-    bool m_valid;
+
 
     FileDownloader * m_fileDownloader;
     QTimer      * m_refreshTimer;
+    QMap<QString, Builder *> m_builders;
 
-    QMap<QString, Builder> m_builders;
+    int m_refreshCounter;
 
 private slots:
     void refreshBuilds();

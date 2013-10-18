@@ -25,21 +25,21 @@
 
 Builder::Builder()
 {
-    m_valid = false;
+
 }
 
-Builder::Builder(QString xml)
+Builder::Builder(const QByteArray &xml)
 {
     parseXml(xml);
 }
 
-bool Builder::parseXml(QString xml)
+bool Builder::parseXml(const QByteArray &xml)
 {
     Builds builds;
     QDomDocument doc;
     if (!doc.setContent(xml))
     {
-        Log::Instance()->Error(QString("Bummer ! Looks like the build machine URL : %1 - is complete garbage.").arg(xml));
+        Log::Instance()->Error(QString("Bummer ! Looks like the build machine is complete garbage."));
         return false;
     }
     QDomElement root = doc.documentElement();
@@ -56,14 +56,10 @@ bool Builder::parseXml(QString xml)
             {
                 QDomNode jobNode = nodeParent.firstChild();
                 Build * build = new Build(jobNode);
-                if(build->IsConsistent() && build->IsBuildable())
-                    builds.append(build);
-
+                //if(build->IsConsistent() && build->IsBuildable())
+                  builds.append(build);
             }
-
-
         }
-
         nodeParent = nodeParent.nextSibling();
     }
 

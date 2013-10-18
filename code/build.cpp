@@ -57,7 +57,6 @@ Build::Build(QDomNode node) :
 
                     lastBuildNode = lastBuildNode.nextSibling();
                 }
-
             }
 
         }
@@ -66,7 +65,7 @@ Build::Build(QDomNode node) :
 }
 
 
-bool Build::parseXml(QString xmlString)
+bool Build::parseXml(const QByteArray & xmlString)
 {
     if(xmlString.isEmpty())
         return false;
@@ -74,7 +73,7 @@ bool Build::parseXml(QString xmlString)
     QDomDocument doc;
     if (!doc.setContent(xmlString))
     {
-        Log::Instance()->Error(QString("Bummer ! Looks like the build machine URL : %1 - is complete garbage.").arg(xmlString));
+        Log::Instance()->Error(QString("Bummer ! Looks like the build machine is complete garbage."));
         return false;
     }
     QDomElement root = doc.documentElement();
@@ -98,11 +97,11 @@ bool Build::parseXml(QString xmlString)
                 {
                     QDomElement lastBuildElement = lastBuildNode.toElement();
                     if(lastBuildElement.tagName() == "result")
-                    {
                        setResult(lastBuildElement.text());
-                    }
                     else if(lastBuildElement.tagName() == "building" && lastBuildElement.text().toLower() == "true")
                         setStatus(BUILDING);
+                    if(lastBuildElement.tagName() == "number")
+                       setNumber(lastBuildElement.text());
                     else if(lastBuildElement.tagName() == "culprit")
                     {
                         QDomNode culpritNode = lastBuildNode.firstChild();
@@ -122,9 +121,9 @@ bool Build::parseXml(QString xmlString)
 
             }
             else if(element.tagName() == "description")
-            {
                 setDescription(element.text());
-            }
+            else if(element.tagName() == "buildable")
+                setBuildable(element.text().toLower() == "true");
 
         }
 
@@ -137,7 +136,7 @@ bool Build::parseXml(QString xmlString)
 
 
 
-void Build::setResult(QString result)
+void Build::setResult(const QString &result)
 {
     if(result == "ABORTED")
     {
@@ -188,7 +187,7 @@ bool Build::IsConsistent() const
     return true;
 }
 
-void Build::setDescription(QString description)
+void Build::setDescription(const QString &description)
 {
     m_description = description;
 

@@ -67,10 +67,12 @@ void Locator::CheckForBuilderChanges(QSet<QString> buildMachineURLs)
     QSet<QString> disapearedBuilds;
 
     disapearedBuilds = m_knownBuildMachines - buildMachineURLs;
-    emit buildersDisapeared(disapearedBuilds.toList());
+    if(!disapearedBuilds.isEmpty())
+        emit buildersDisapeared(disapearedBuilds.toList());
 
     newBuilds = buildMachineURLs - m_knownBuildMachines;
-    emit buildersFound(newBuilds.toList());
+    if(!newBuilds.isEmpty())
+        emit buildersFound(newBuilds.toList());
 
     m_knownBuildMachines = buildMachineURLs;
 
@@ -83,28 +85,29 @@ void Locator::readPendingDatagrams()
     QSet<QString> builderUrls;
 
     for (int i=0; i< 10; i++)
-    while (m_udpSocket->hasPendingDatagrams())
     {
-        QByteArray datagram;
-        datagram.resize(m_udpSocket->pendingDatagramSize());
-        QHostAddress sender;
-        m_udpSocket->readDatagram(datagram.data(), datagram.size(), &sender);
-        QString datagramString = QString(datagram);
-        QString url = GetUrl(datagramString);
-
-
-        //Log::Instance()->Status(QString("Jenkins discovered on:   %1").arg(sender.toString()));
-
-        if(!url.isEmpty())
+        while (m_udpSocket->hasPendingDatagrams())
         {
-            builderUrls << url;
-            Log::Instance()->Status(QString("Url                  :   %1").arg(url));
+            QByteArray datagram;
+            datagram.resize(m_udpSocket->pendingDatagramSize());
+            QHostAddress sender;
+            m_udpSocket->readDatagram(datagram.data(), datagram.size(), &sender);
+            QString datagramString = QString(datagram);
+            QString url = GetUrl(datagramString);
+
+            //Log::Instance()->Status(QString("Jenkins discovered on:   %1").arg(sender.toString()));
+
+            if(!url.isEmpty())
+            {
+                builderUrls << url;
+                Log::Instance()->Status(QString("Url                  :   %1").arg(url));
+            }
         }
     }
     CheckForBuilderChanges(builderUrls);
 }
 
-QString Locator::GetUrl(QString datagram)
+QString Locator::GetUrl(const QString &datagram) const
 {
     QDomDocument doc;
     if (!doc.setContent(datagram))
@@ -120,8 +123,6 @@ QString Locator::GetUrl(QString datagram)
        // Log::Instance()->Error(QString("Dang ! I was hoping for a single element. Instead we got %1. This probably should not happen...").arg(elements.count()));
         return QString();
     }
-
-    //return QString("%1api/xml/").arg(elements.at(0).toElement().text());
     return QString("%1api/xml/?depth=1").arg(elements.at(0).toElement().text());
 }
 

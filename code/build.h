@@ -27,14 +27,14 @@ class Build
 {
 public:
     typedef enum {
-        Undefined,
+        Undefined = 0,
         Windows,
         Mac,
         Linux
     } TARGET_OS;
 
     typedef enum {
-        SUCCESS,
+        SUCCESS = 0,
         FAILURE,
         BUILDING,
         ABORTED,
@@ -44,52 +44,46 @@ public:
 
     Build();
     Build(QDomNode node);
-    QString ToDisplayString() const;
 
-    QString Description() const { return m_description; }
-    QString Name() const  { return m_name; }
-    QString Url() const { return m_url; }
-    bool Failed() const { return m_status == FAILURE; }
-    STATUS Status() const { return m_status; }
-    void Timestamp(QString timestamp) {m_timestamp = timestamp; }
 
-    QString Name() { return m_name.replace("%20", " ");}
+    QString       Description()      const { return m_description; }
+    bool          Failed()           const { return m_status == FAILURE; }
+    bool          IsBuildable()      const { return m_isBuildable; }
+    bool          IsConsistent()     const;
+    QDateTime     LastHeardFrom()    const { return m_lastHeardFrom; }
+    QString       MachineShortName() const;
+    QString       Name()             const  { return m_name; }
+    bool          parseXml(const QByteArray & xmlString);
+    STATUS        Status()           const { return m_status; }
+    TARGET_OS     Target()           const { return m_target;}
+    QString       ToDisplayString()  const;
+    QString       Url()              const { return m_url; }
 
-    void AddExcuse(QString excuse) { m_excuses.append(excuse); }
-
-    QDateTime LastHeardFrom() const { return m_lastHeardFrom; }
-
-    bool IsBuildable() const { return m_isBuildable; }
-
-    TARGET_OS Target() const { return m_target;}
-
-    bool IsConsistent() const;
-    QString MachineShortName() const;
-
-    bool parseXml(QString xmlString);
 private:
+    void setBuildable(const bool & isBuildable)      { m_isBuildable = isBuildable; }
+    void setCulprits(const QStringList & culprits)   {m_culprits = culprits; }
+    void setDescription(const QString & description);
+    void setLastHeardFrom(const QDateTime & time)    { m_lastHeardFrom = time; }
+    void setName(const QString & name)               { m_name=name; }
+    void setNumber(const QString & number)           { m_number = number; }
+    void setUrl(const QString & url)                 { m_url=url + "api/xml?depth=1"; }
+    void setResult(const QString & result);
+    void setStatus(STATUS status)                    { m_status = status;}
 
-    void setBuildable(bool isBuildable)  { m_isBuildable = isBuildable; }
-    void setCulprits(QStringList culprits) {m_culprits = culprits; }
-    void setDescription(QString description);
-    void setLastHeardFrom(QDateTime time) { m_lastHeardFrom = time; }
-    void setName(QString name) { m_name=name; }
-    void setNumber(QString number) { m_number = number; }
-    void setUrl(QString url) { m_url=url + "api/xml?depth=1"; }
-    void setResult(QString result);
-    void setStatus(STATUS status) { m_status = status;}
-
-    QString m_name;
-    QString m_url;
-    QString m_number;
-    STATUS m_status;
-    QString m_timestamp;
-    bool m_isBuildable;
     QStringList m_culprits;
-    QStringList m_excuses;
-    QDateTime m_lastHeardFrom;
-    TARGET_OS m_target;
     QString m_description;
+    bool    m_isBuildable;
+    QDateTime m_lastHeardFrom;
+    QString m_name;
+    QString m_number;
+    STATUS  m_status;
+    TARGET_OS m_target;
+    QString m_timestamp;
+    QString m_url;
+
+
+
+
 };
 
 #endif // BUILD_H

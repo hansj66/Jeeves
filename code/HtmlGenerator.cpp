@@ -10,12 +10,10 @@ HtmlGenerator::HtmlGenerator(Builders * builders, QObject * parent) :
 
     RefreshHtml();
 
-    m_refreshTimer = new QTimer(this);
-    connect(m_refreshTimer, SIGNAL(timeout()), this, SLOT(RefreshHtml()));
-    m_refreshTimer->start(3000);
+    connect(m_builders, SIGNAL(updated()), this, SLOT(RefreshHtml()));
 }
 
-void HtmlGenerator::RefreshHtml()
+void HtmlGenerator::RefreshHtml() const
 {
     QFile outfile("./index.html");
     if (!outfile.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -31,7 +29,7 @@ void HtmlGenerator::RefreshHtml()
 
     out << "<HEAD>\n";
     out << "<title>Jeeves is awesome</title>\n";
-    out << "<meta http-equiv=\"refresh\" content=\"2\" >\n";
+    out << "<meta http-equiv=\"refresh\" content=\"4\" >\n";
     out << "<link rel=\"stylesheet\" type=\"text/css\" href=\"jeeves.css\">";
 
     out << "</HEAD>\n";
@@ -88,7 +86,7 @@ void HtmlGenerator::RefreshHtml()
 
     out << "</TABLE>\n</BODY>\n</html>\n";
 
-    Log::Instance()->Status(QDateTime::currentDateTime().toString(), QString("Time: "));
+    //Log::Instance()->Status(QDateTime::currentDateTime().toString(), QString("Time: "));
     outfile.close();
 }
 

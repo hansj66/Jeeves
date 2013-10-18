@@ -29,7 +29,6 @@ class Locator : public QObject
     Q_OBJECT
 public:
     explicit Locator(QHostAddress & broadcastAddress, QObject *parent = 0);
-    QStringList BuildMachineAPIs();
 
 signals:
     void buildersDisapeared(QStringList url);
@@ -42,9 +41,8 @@ private:
     QUdpSocket *    m_udpSocket;
     QHostAddress    m_broadcastAddress;
     QSet<QString>   m_knownBuildMachines;
-    QTimer      * m_broadcastTimer;
-    QString GetUrl(QString datagram);
-    QString GetAPI(QString buildMachineURL);
+    QTimer      *   m_broadcastTimer;
+    QString GetUrl(const QString &datagram) const;
     void CheckForBuilderChanges(QSet<QString> buildMachineURLs);
 
 signals:

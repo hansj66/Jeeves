@@ -31,28 +31,34 @@ Builders::Builders()
     m_refreshTimer = new QTimer(this);
     connect(m_refreshTimer, SIGNAL(timeout()), this, SLOT(refreshBuilds()));
     m_refreshTimer->start(10000);
+
+    m_refreshCounter = 0;
 }
 
 
-Builds Builders::builds()
+Builds Builders::builds() const
 {
     Builds builds;
-    QMapIterator<QString, Builder> i(m_builders);
+    QMapIterator<QString, Builder*> i(m_builders);
     while (i.hasNext())
     {
         i.next();
-        builds.append(i.value().builds());
+        foreach( Build * b, i.value()->builds())
+        {
+            if(b->IsConsistent() && b->IsBuildable())
+                builds.append(b);
+        }
     }
     return builds;
 }
 
-Build* Builders::build(QString url)
+Build * Builders::build(QString url)
 {
-    QMapIterator<QString, Builder> i(m_builders);
+    QMapIterator<QString, Builder * > i(m_builders);
     while (i.hasNext())
     {
         i.next();
-        foreach(Build * b, i.value().builds())
+        foreach(Build * b, i.value()->builds())
         {
             if(b->Url().replace("%20", " ") == url)
                 return b;
@@ -64,66 +70,77 @@ Build* Builders::build(QString url)
 
 void Builders::Add(QString url)
 {
-    QString xml =  QString(m_fileDownloader->downloadedData(url));
+    QByteArray xml = m_fileDownloader->downloadedData(url);
     if(!xml.isEmpty())
     {
         QXmlStreamReader xmlReader(xml);
         xmlReader.readNextStartElement();
-        if(xmlReader.name().endsWith("hudson"))
+        if(xmlReader.name().endsWith(QByteArray("hudson")))
         {
-            m_builders[url] = Builder(xml);
-            foreach(Build * b, m_builders[url].builds())
+            m_builders[url] = new Builder(xml);
+            foreach(Build * b, m_builders[url]->builds())
             {
                 if(!b->Url().isEmpty())
                     m_fileDownloader->Get(b->Url());
             }
         }
-        else if(xmlReader.name().endsWith("Project") )
+        else if(xmlReader.name().endsWith(QByteArray("Project")) )
         {
             Build * b = build(url);
             if(b)
                 b->parseXml(xml);
         }
-
     }
-
 }
 
 void Builders::OnAddBuilders(QStringList urls)
 {
+    if(urls.isEmpty()) return;
     foreach(QString url, urls)
     {
         m_fileDownloader->Get(url);
         Log::Instance()->Status(url, QString("Adding: "));
     }
+    refreshBuilds();
 }
 
 void Builders::OnRemoveBuilders(QStringList urls)
 {
+    if(urls.isEmpty()) return;
     foreach(QString url, urls)
     {
         if(m_builders.contains(url))
+        {
+            delete m_builders[url];
             m_builders.remove(url);
+        }
     }
+    refreshBuilds();
 }
 
 
 void Builders::refreshBuilds()
 {
-    foreach(Build * b, builds())
+    QMapIterator<QString, Builder*> i(m_builders);
+    while (i.hasNext())
     {
-        m_fileDownloader->Get(b->Url());
+        i.next();
+        foreach( Build * b, i.value()->builds())
+        {
+            m_fileDownloader->Get(b->Url());
+        }
     }
+    emit updated();
 }
 
 int Builders::RemoveStale()
 {
     int removed = 0;
-    QMapIterator<QString, Builder> i(m_builders);
+    QMapIterator<QString, Builder * > i(m_builders);
     while (i.hasNext())
     {
         i.next();
-        removed += m_builders[i.key()].RemoveStale();
+        removed += m_builders[i.key()]->RemoveStale();
     }
     return removed;
 }

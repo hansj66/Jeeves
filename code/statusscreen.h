@@ -45,9 +45,6 @@ public slots:
 
 private:
     Builders * m_builders;
-    QTimer * m_refreshTimer;
-
-
 
     QList<QLineEdit *> m_DisplayLines;
     QList<QLabel *> m_Icons;
