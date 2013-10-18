@@ -50,6 +50,57 @@ Build::Build(QDomNode node) :
 }
 
 
+bool Build::parseLastBuildXml(const QByteArray &xmlString)
+{
+    if(xmlString.isEmpty())
+        return false;
+
+    QDomDocument doc;
+    if (!doc.setContent(xmlString))
+    {
+        Log::Instance()->Error(QString("Bummer ! Looks like the build machine is complete garbage."));
+        return false;
+    }
+
+    QDomElement root = doc.documentElement();
+    if(root.tagName() != "freeStyleBuild")
+        return false;
+
+    setCulprits(QStringList());
+
+    QDomNode nodeParent = root.firstChild();
+    while(!nodeParent.isNull())
+    {
+        QDomElement element = nodeParent.toElement();
+        if(!element.isNull())
+        {
+            QString tagName = element.tagName();
+            if(element.tagName() == "result")
+               setResult(element.text());
+            else if(element.tagName() == "building" && element.text().toLower() == "true")
+                setStatus(BUILDING);
+            else if(element.tagName() == "number")
+               setNumber(element.text());
+            else if(element.tagName() == "culprit")
+            {
+                QDomNode culpritNode = element.firstChild();
+                while(!culpritNode.isNull())
+                {
+                    QDomElement culpritElement = culpritNode.toElement();
+                    QStringList culprits;
+                    if(culpritElement.tagName() == "fullName")
+                       culprits << culpritElement.text();
+                    setCulprits(culprits);
+                    culpritNode = culpritNode.nextSibling();
+                }
+            }
+        }
+        nodeParent = nodeParent.nextSibling();
+    }
+    return true;
+}
+
+
 bool Build::parseXml(const QByteArray & xmlString)
 {
     if(xmlString.isEmpty())
@@ -81,25 +132,8 @@ bool Build::parseXml(const QByteArray & xmlString)
                 while(!lastBuildNode.isNull())
                 {
                     QDomElement lastBuildElement = lastBuildNode.toElement();
-                    if(lastBuildElement.tagName() == "result")
-                       setResult(lastBuildElement.text());
-                    else if(lastBuildElement.tagName() == "building" && lastBuildElement.text().toLower() == "true")
-                        setStatus(BUILDING);
-                    if(lastBuildElement.tagName() == "number")
-                       setNumber(lastBuildElement.text());
-                    else if(lastBuildElement.tagName() == "culprit")
-                    {
-                        QDomNode culpritNode = lastBuildNode.firstChild();
-                        while(!culpritNode.isNull())
-                        {
-                            QDomElement culpritElement = culpritNode.toElement();
-                            QStringList culprits;
-                            if(culpritElement.tagName() == "fullName")
-                               culprits << culpritElement.text();
-                            setCulprits(culprits);
-                            culpritNode = culpritNode.nextSibling();
-                        }
-                    }
+                    if(lastBuildElement.tagName() == "url")
+                       setLastBuildUrl(lastBuildElement.text());
 
                     lastBuildNode = lastBuildNode.nextSibling();
                 }
@@ -108,10 +142,13 @@ bool Build::parseXml(const QByteArray & xmlString)
             else if(element.tagName() == "description")
                 setDescription(element.text());
             else if(element.tagName() == "buildable")
+            {
                 setBuildable(element.text().toLower() == "true");
+                if(element.text().toLower() != "true")
+                    return false;
+            }
 
         }
-
         nodeParent = nodeParent.nextSibling();
     }
     setLastHeardFrom(QDateTime::currentDateTime());

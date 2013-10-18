@@ -23,12 +23,12 @@ void FileDownloader::Get(QString url)
 
 void FileDownloader::fileDownloaded(QNetworkReply* pReply)
 {
-    QUrl url = pReply->url();
-    m_DownloadedData[url.toString()] = pReply->readAll();
+    QString url = pReply->url().toString();
+    m_DownloadedData[url] = pReply->readAll();
 
     //emit a signal
     pReply->deleteLater();
-    emit downloaded(url.toString());
+    emit downloaded(url);
 }
 
 QByteArray FileDownloader::downloadedData(QString url) const

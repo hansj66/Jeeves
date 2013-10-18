@@ -60,7 +60,7 @@ Build * Builders::build(QString url)
         i.next();
         foreach(Build * b, i.value()->builds())
         {
-            if(b->Url().replace("%20", " ") == url)
+            if(b->Url().replace("%20", " ") == url || b->LastBuildUrl().replace("%20", " ") == url)
                 return b;
         }
 
@@ -73,9 +73,7 @@ void Builders::Add(QString url)
     QByteArray xml = m_fileDownloader->downloadedData(url);
     if(!xml.isEmpty())
     {
-        QXmlStreamReader xmlReader(xml);
-        xmlReader.readNextStartElement();
-        if(xmlReader.name().endsWith(QByteArray("hudson")))
+        if(xml.startsWith("<hudson>"))
         {
             m_builders[url] = new Builder(xml);
             foreach(Build * b, m_builders[url]->builds())
@@ -84,11 +82,22 @@ void Builders::Add(QString url)
                     m_fileDownloader->Get(b->Url());
             }
         }
-        else if(xmlReader.name().endsWith(QByteArray("Project")) )
+        else if(xml.startsWith("<freeStyleProject>") )
         {
             Build * b = build(url);
             if(b)
+            {
                 b->parseXml(xml);
+                if(!b->LastBuildUrl().isEmpty())
+                    m_fileDownloader->Get(b->LastBuildUrl());
+
+            }
+        }
+        else if(xml.startsWith("<freeStyleBuild>"))
+        {
+            Build * b = build(url);
+            if(b)
+                b->parseLastBuildXml(xml);
         }
     }
 }

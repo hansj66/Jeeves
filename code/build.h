@@ -50,9 +50,11 @@ public:
     bool          Failed()           const { return m_status == FAILURE; }
     bool          IsBuildable()      const { return m_isBuildable; }
     bool          IsConsistent()     const;
+    QString       LastBuildUrl()     const  { return m_lastBuildUrl; }
     QDateTime     LastHeardFrom()    const { return m_lastHeardFrom; }
     QString       MachineShortName() const;
     QString       Name()             const  { return m_name; }
+    bool          parseLastBuildXml(const QByteArray & xmlString);
     bool          parseXml(const QByteArray & xmlString);
     STATUS        Status()           const { return m_status; }
     TARGET_OS     Target()           const { return m_target;}
@@ -63,10 +65,11 @@ private:
     void setBuildable(const bool & isBuildable)      { m_isBuildable = isBuildable; }
     void setCulprits(const QStringList & culprits)   {m_culprits = culprits; }
     void setDescription(const QString & description);
+    void setLastBuildUrl(const QString &lastBuildUrl){m_lastBuildUrl = lastBuildUrl + "api/xml";}
     void setLastHeardFrom(const QDateTime & time)    { m_lastHeardFrom = time; }
     void setName(const QString & name)               { m_name=name; }
     void setNumber(const QString & number)           { m_number = number; }
-    void setUrl(const QString & url)                 { m_url=url + "api/xml?depth=1"; }
+    void setUrl(const QString & url)                 { m_url=url + "api/xml"; }
     void setResult(const QString & result);
     void setStatus(STATUS status)                    { m_status = status;}
 
@@ -80,6 +83,7 @@ private:
     TARGET_OS m_target;
     QString m_timestamp;
     QString m_url;
+    QString m_lastBuildUrl;
 
 
 

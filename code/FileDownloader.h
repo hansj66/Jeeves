@@ -15,7 +15,7 @@ public:
     void Get(QString url);
     virtual ~FileDownloader();
 
-    QByteArray downloadedData(QString m_url) const;
+    QByteArray  downloadedData(QString m_url) const;
 
 signals:
         void downloaded(QString url);
