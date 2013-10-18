@@ -41,24 +41,9 @@ Build::Build(QDomNode node) :
             if(element.tagName() == "name")
                setName(element.text());
             else if(element.tagName() == "url")
-            {
                 setUrl(element.text());
-            }
             else if(element.tagName() == "buildable")
                 setBuildable(element.text().toLower() == "true");
-            else if(element.tagName() == "lastBuild")
-            {
-                QDomNode lastBuildNode = node.firstChild();
-                while(!lastBuildNode.isNull())
-                {
-                    QDomElement lastBuildElement = lastBuildNode.toElement();
-                    if(lastBuildElement.tagName() == "number")
-                       setNumber(lastBuildElement.text());
-
-                    lastBuildNode = lastBuildNode.nextSibling();
-                }
-            }
-
         }
         node = node.nextSibling();
     }

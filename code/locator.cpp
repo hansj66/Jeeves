@@ -123,7 +123,7 @@ QString Locator::GetUrl(const QString &datagram) const
        // Log::Instance()->Error(QString("Dang ! I was hoping for a single element. Instead we got %1. This probably should not happen...").arg(elements.count()));
         return QString();
     }
-    return QString("%1api/xml/?depth=1").arg(elements.at(0).toElement().text());
+    return QString("%1api/xml/").arg(elements.at(0).toElement().text());
 }
 
 
