@@ -22,6 +22,7 @@
 #include <QTime>
 #include <QDomNode>
 #include "FileDownloader.h"
+//#include "vld.h"
 
 class Build
 {
