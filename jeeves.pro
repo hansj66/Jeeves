@@ -14,7 +14,9 @@ TEMPLATE = app
 
 INCLUDEPATH += $$(BOOSTPATH)
 INCLUDEPATH += ./code
+INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/src"
 
+#LIBS += "-LC:/Program Files (x86)/Visual Leak Detector/lib/Win32/" -lvld
 
 SOURCES += code/main.cpp \
     code/locator.cpp \

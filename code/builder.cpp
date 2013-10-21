@@ -35,7 +35,7 @@ Builder::Builder(const QByteArray &xml)
 
 bool Builder::parseXml(const QByteArray &xml)
 {
-    Builds builds;
+    clear();
     QDomDocument doc;
     if (!doc.setContent(xml))
     {
@@ -56,14 +56,11 @@ bool Builder::parseXml(const QByteArray &xml)
             {
                 QDomNode jobNode = nodeParent.firstChild();
                 Build * build = new Build(jobNode);
-                //if(build->IsConsistent() && build->IsBuildable())
-                  builds.append(build);
+                m_builds.append(build);
             }
         }
         nodeParent = nodeParent.nextSibling();
     }
-
-    m_builds = builds;
     return true;
 }
 
@@ -72,6 +69,16 @@ bool Builder::parseXml(const QByteArray &xml)
 Builds Builder::builds() const
 {
     return m_builds;
+}
+
+void Builder::clear()
+{
+    foreach(Build * b, m_builds)
+    {
+        delete b;
+    }
+    m_builds.clear();
+
 }
 
 int Builder::RemoveStale()

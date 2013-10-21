@@ -75,6 +75,8 @@ void Builders::Add(QString url)
     {
         if(xml.startsWith("<hudson>"))
         {
+            if(m_builders.contains(url))
+                delete m_builders[url];
             m_builders[url] = new Builder(xml);
             foreach(Build * b, m_builders[url]->builds())
             {

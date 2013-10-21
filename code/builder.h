@@ -30,6 +30,7 @@ public:
     Builder(const QByteArray &xml);
     bool parseXml(const QByteArray &xml);
     Builds builds() const;
+    void clear();
     int RemoveStale();
 
 private:

@@ -79,7 +79,7 @@ void HtmlGenerator::RefreshHtml() const
                 imageFile = "undefined.png";
         }
 
-        out << "<TR>" << QString("<TD bgcolor=\"white\">") << QString("<img src=\"%1\"  width=\"75\" height=\"75\" alt=\"build machine\"  >").arg(imageFile)  << "</TD>";
+        out << "<TR>" << QString("<TD id=\"icon\">") << QString("<img src=\"%1\"  width=\"50\" height=\"50\" alt=\"build machine\"  >").arg(imageFile)  << "</TD>";
         out << QString("<TD bgcolor=\"%1\">").arg(color) << "<H1>" << build->ToDisplayString() << "</H1></TD>";
         out << "</TR>\n";
     }

@@ -15,10 +15,10 @@ public:
     void Get(QString url);
     virtual ~FileDownloader();
 
-    QByteArray  downloadedData(QString m_url) const;
+    QByteArray  downloadedData(const QString & m_url);
 
 signals:
-        void downloaded(QString url);
+        void downloaded(const QString & url);
 
 private slots:
     void fileDownloaded(QNetworkReply* pReply);

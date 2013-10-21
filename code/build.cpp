@@ -74,7 +74,6 @@ bool Build::parseLastBuildXml(const QByteArray &xmlString)
         QDomElement element = nodeParent.toElement();
         if(!element.isNull())
         {
-            QString tagName = element.tagName();
             if(element.tagName() == "result")
                setResult(element.text());
             else if(element.tagName() == "building" && element.text().toLower() == "true")
@@ -180,6 +179,7 @@ void Build::setResult(const QString &result)
 QString Build::ToDisplayString() const
 {
     QString build = QString("%1: %2 (Build #%3) ").arg(MachineShortName()).arg(Name()).arg(m_number);
+    build.replace("_"," ");
 
     if (m_culprits.length() == 0)
         return build;

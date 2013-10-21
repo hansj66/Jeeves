@@ -80,12 +80,11 @@ void Locator::CheckForBuilderChanges(QSet<QString> buildMachineURLs)
 
 void Locator::readPendingDatagrams()
 {
-    cout << "Waiting for a response..." << std::endl;
-
+    Log::Instance()->Status(QString("Waiting for a response..."));
     QSet<QString> builderUrls;
 
-    for (int i=0; i< 10; i++)
-    {
+//    for (int i=0; i< 10; i++)
+//    {
         while (m_udpSocket->hasPendingDatagrams())
         {
             QByteArray datagram;
@@ -103,7 +102,7 @@ void Locator::readPendingDatagrams()
                 Log::Instance()->Status(QString("Url                  :   %1").arg(url));
             }
         }
-    }
+    //}
     CheckForBuilderChanges(builderUrls);
 }
 
