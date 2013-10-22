@@ -67,7 +67,7 @@ bool Build::parseLastBuildXml(const QByteArray &xmlString)
         return false;
 
     setCulprits(QStringList());
-
+    QStringList culprits;
     QDomNode nodeParent = root.firstChild();
     while(!nodeParent.isNull())
     {
@@ -83,19 +83,20 @@ bool Build::parseLastBuildXml(const QByteArray &xmlString)
             else if(element.tagName() == "culprit")
             {
                 QDomNode culpritNode = element.firstChild();
+
                 while(!culpritNode.isNull())
                 {
                     QDomElement culpritElement = culpritNode.toElement();
-                    QStringList culprits;
                     if(culpritElement.tagName() == "fullName")
                        culprits << culpritElement.text();
-                    setCulprits(culprits);
                     culpritNode = culpritNode.nextSibling();
                 }
+
             }
         }
-        nodeParent = nodeParent.nextSibling();
+        nodeParent = nodeParent.nextSibling();    
     }
+    setCulprits(culprits);
     return true;
 }
 
@@ -193,7 +194,7 @@ QString Build::ToDisplayString() const
 
     build.append(" : ");
     for (int i=0; i<m_culprits.length(); i++)
-        build.append(QString("%1,").arg(m_culprits.at(i)));
+        build.append(QString("%1, ").arg(m_culprits.at(i)));
     return build.left(build.length()-1);
 }
 
