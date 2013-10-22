@@ -195,7 +195,7 @@ QString Build::ToDisplayString() const
     build.append(" : ");
     for (int i=0; i<m_culprits.length(); i++)
         build.append(QString("%1, ").arg(m_culprits.at(i)));
-    return build.left(build.length()-1);
+    return build.left(build.length()-2);
 }
 
 QString Build::MachineShortName() const
