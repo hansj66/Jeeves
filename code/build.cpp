@@ -67,6 +67,7 @@ bool Build::parseLastBuildXml(const QByteArray &xmlString)
         return false;
 
     setCulprits(QStringList());
+    setStartedBy(QString());
     QStringList culprits;
     QDomNode nodeParent = root.firstChild();
     while(!nodeParent.isNull())
