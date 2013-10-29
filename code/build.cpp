@@ -93,6 +93,30 @@ bool Build::parseLastBuildXml(const QByteArray &xmlString)
                 }
 
             }
+            else if(element.tagName() == "action")
+            {
+                QDomNode actionNode = element.firstChild();
+                while(!actionNode.isNull())
+                {
+                    QDomElement actionElement = actionNode.toElement();
+                    if(actionElement.tagName() == "cause")
+                    {
+                        QDomNode causeNode = actionElement.firstChild();
+                        while(!causeNode.isNull())
+                        {
+                            QDomElement causeElement = causeNode.toElement();
+                            if(causeElement.tagName() == "userName")
+                               setStartedBy(causeElement.text());
+                            causeNode = causeNode.nextSibling();
+                        }
+
+                    }
+                    actionNode = actionNode.nextSibling();
+                }
+            }
+
+
+
         }
         nodeParent = nodeParent.nextSibling();    
     }
@@ -184,10 +208,25 @@ QString Build::ToDisplayString() const
 
     if (m_culprits.length() == 0)
         return build;
-    if(Failed())
-        build.append("Culprit");
-    else
+
+    if(Status() == SUCCESS)
+    {
         build.append("Hero");
+    }
+    else if(Status() == FAILURE)
+    {
+        build.append("Culprit");
+    }
+    else if(Status() == BUILDING)
+    {
+        build.append(StartedBy());
+        return build;
+    }
+    else if(Status() == ABORTED)
+    {
+        build.append("Who did it?");
+        return build;
+    }
 
     if (m_culprits.length() > 1)
         build.append("s");

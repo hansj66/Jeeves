@@ -58,6 +58,7 @@ public:
     bool          parseLastBuildXml(const QByteArray & xmlString);
     bool          parseXml(const QByteArray & xmlString);
     STATUS        Status()           const { return m_status; }
+    QString       StartedBy()        const { return m_startedBy.isEmpty() ? QString("Started by timer") : QString("Started by %1").arg(m_startedBy);}
     TARGET_OS     Target()           const { return m_target;}
     QString       ToDisplayString()  const;
     QString       Url()              const { return m_url; }
@@ -73,6 +74,7 @@ private:
     void setUrl(const QString & url)                 { m_url=url + "api/xml"; }
     void setResult(const QString & result);
     void setStatus(STATUS status)                    { m_status = status;}
+    void setStartedBy(QString startedBy)             { m_startedBy = startedBy;}
 
     QStringList m_culprits;
     QString m_description;
@@ -85,6 +87,7 @@ private:
     QString m_timestamp;
     QString m_url;
     QString m_lastBuildUrl;
+    QString m_startedBy;
 
 
 
