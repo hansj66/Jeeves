@@ -17,66 +17,81 @@
 
 #ifndef BUILD_H
 #define BUILD_H
-
 #include <QString>
 #include <QStringList>
 #include <QTime>
+#include <QDomNode>
+#include "FileDownloader.h"
+//#include "vld.h"
 
 class Build
 {
 public:
-
     typedef enum {
-        Undefined,
+        Undefined = 0,
         Windows,
         Mac,
         Linux
     } TARGET_OS;
 
+    typedef enum {
+        SUCCESS = 0,
+        FAILURE,
+        BUILDING,
+        ABORTED,
+        UNKNOWN
+    } STATUS;
+
+
     Build();
-    QString ToString() const;
-    QString ToDisplayString() const;
+    Build(QDomNode node);
 
-    QString Name() const  { return m_name; }
-    QString Url() const { return m_url; }
 
-    void Number(QString number) { m_number = number; }
-    void Result(QString result) { m_result = result; }
-    QString Result() const { return m_result; }
-    bool Failed() const { return m_result == "FAILURE"; }
-    bool Success() const { return m_result == "SUCCESS"; }
-    void Timestamp(QString timestamp) {m_timestamp = timestamp; }
-    void Culprits(QStringList culprits) {m_culprits = culprits; }
-    void Name(QString name) { m_name=name; }
-    QString Name() { return m_name.replace("%20", " ");}
-    void Url(QString url) { m_url=url; }
-    void AddExcuse(QString excuse) { m_excuses.append(excuse); }
-    void LastHeardFrom(QDateTime time) { m_lastHeardFrom = time; }
-    QDateTime LastHeardFrom() const { return m_lastHeardFrom; }
-    void Building(QString isBuilding) { m_isBuilding = isBuilding; }
-    bool IsBuilding() const { return m_isBuilding == "true"; }
-    void Buildable(QString isBuildable)  { m_isBuildable = isBuildable; }
-    bool IsBuildable() const { return m_isBuildable == "true"; }
-    void Description(QString description);
-    QString Description() const { return m_description; }
-    TARGET_OS Target() const { return m_target;}
+    QString       Description()      const { return m_description; }
+    bool          Failed()           const { return m_status == FAILURE; }
+    bool          IsBuildable()      const { return m_isBuildable; }
+    bool          IsConsistent()     const;
+    QString       LastBuildUrl()     const  { return m_lastBuildUrl; }
+    QDateTime     LastHeardFrom()    const { return m_lastHeardFrom; }
+    QString       MachineShortName() const;
+    QString       Name()             const  { return m_name; }
+    bool          parseLastBuildXml(const QByteArray & xmlString);
+    bool          parseXml(const QByteArray & xmlString);
+    STATUS        Status()           const { return m_status; }
+    QString       StartedBy()        const { return m_startedBy.isEmpty() ? QString("Started by timer") : QString("Started by %1").arg(m_startedBy);}
+    TARGET_OS     Target()           const { return m_target;}
+    QString       ToDisplayString()  const;
+    QString       Url()              const { return m_url; }
 
-    bool IsConsistent() const;
-    QString MachineShortName() const;
+private:
+    void setBuildable(const bool & isBuildable)      { m_isBuildable = isBuildable; }
+    void setCulprits(const QStringList & culprits)   {m_culprits = culprits; }
+    void setDescription(const QString & description);
+    void setLastBuildUrl(const QString &lastBuildUrl){m_lastBuildUrl = lastBuildUrl + "api/xml";}
+    void setLastHeardFrom(const QDateTime & time)    { m_lastHeardFrom = time; }
+    void setName(const QString & name)               { m_name=name; }
+    void setNumber(const QString & number)           { m_number = number; }
+    void setUrl(const QString & url)                 { m_url=url + "api/xml"; }
+    void setResult(const QString & result);
+    void setStatus(STATUS status)                    { m_status = status;}
+    void setStartedBy(QString startedBy)             { m_startedBy = startedBy;}
 
- private:
-    QString m_name;
-    QString m_url;
-    QString m_number;
-    QString m_result;
-    QString m_timestamp;
-    QString m_isBuilding;
-    QString m_isBuildable;
     QStringList m_culprits;
-    QStringList m_excuses;
-    QDateTime m_lastHeardFrom;
-    TARGET_OS m_target;
     QString m_description;
+    bool    m_isBuildable;
+    QDateTime m_lastHeardFrom;
+    QString m_name;
+    QString m_number;
+    STATUS  m_status;
+    TARGET_OS m_target;
+    QString m_timestamp;
+    QString m_url;
+    QString m_lastBuildUrl;
+    QString m_startedBy;
+
+
+
+
 };
 
 #endif // BUILD_H

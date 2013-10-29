@@ -27,16 +27,13 @@
 #include <QLabel>
 
 #include "log.h"
-#include "interrogator.h"
-#include "statusscreen.h"
-#include "locator.h"
-#include "builds.h"
+#include "builders.h"
 
 class StatusScreen : public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit StatusScreen(QHostAddress broadcastAddress, QWidget *parent = 0);
+    explicit StatusScreen(Builders * builders, QWidget *parent = 0);
 
 private:
     void InitBroadcast(QHostAddress broadcastAddress);
@@ -44,13 +41,11 @@ private:
 signals:
     
 public slots:
-    void OnJenkinsInstanceRefresh();
+       void Refresh();
 
 private:
-    Locator * m_locator;
-    Interrogator * m_interrogator;
-    QTimer * m_broadcastTimer;
-    Builds m_builds;
+    Builders * m_builders;
+
     QList<QLineEdit *> m_DisplayLines;
     QList<QLabel *> m_Icons;
     QWidget * m_mainWindow;
@@ -58,10 +53,8 @@ private:
 
     int m_lineHeight;
     int m_discoveredBuilds;
-    int m_refreshInterval;
-    int m_windowHeight;
 
-    void RefreshLayout(int nCount);
+    void RefreshLayout();
     void RefreshData();
     void RefreshUpTime();
     void InitDisplayMessage();

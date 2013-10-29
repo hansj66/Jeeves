@@ -21,63 +21,33 @@
 #include <QPixmap>
 #include <QLabel>
 
-StatusScreen::StatusScreen(QHostAddress broadcastAddress, QWidget *parent) :
+StatusScreen::StatusScreen(Builders *  builders, QWidget *parent) :
     QMainWindow(parent),
-    m_discoveredBuilds(0),
-    m_refreshInterval(0)
+    m_builders(builders),
+    m_discoveredBuilds(0)
 {
     m_started = QDateTime::currentDateTime();
-    InitBroadcast(broadcastAddress);
+    connect(m_builders, SIGNAL(updated()), this, SLOT(Refresh()));
     setWindowFlags(windowFlags() | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
     setWindowState(windowState() | Qt::WindowFullScreen);
-
-
     show();
-    m_windowHeight = height();
+    Refresh();
 }
 
-
-void StatusScreen::InitBroadcast(QHostAddress broadcastAddress)
+void StatusScreen::Refresh()
 {
-    m_locator = new Locator(broadcastAddress, this);
-    m_interrogator = new Interrogator(&m_builds);
-    connect(m_locator, SIGNAL(finished()), this, SLOT(OnJenkinsInstanceRefresh()));
-    m_broadcastTimer = new QTimer(this);
-    connect(m_broadcastTimer, SIGNAL(timeout()), m_locator, SLOT(run()));
-    m_broadcastTimer->start(5000);
-}
-
-void StatusScreen::OnJenkinsInstanceRefresh()
-{
-    QStringList apiList = m_locator->BuildMachineAPIs();
-    Log::Instance()->Status(QString("Known build machines: %1").arg(apiList.count()));
-
-    m_interrogator->Request(apiList);
-
-    if (0 == m_refreshInterval)
-    {
-        // The implementation of the Interrogator class may be "wrong", but this seems to be the easiest way to avoid
-        // memory leaking.
-        QCoreApplication::processEvents(QEventLoop::AllEvents, 3000);
-        delete m_interrogator;
-        m_interrogator = new Interrogator(&m_builds);
-    }
-
-    Log::Instance()->Status(QString("Known builds: %1").arg(m_builds.Count()));
-    Log::Instance()->Status(QString("Excluded builds: %1").arg(m_builds.Excluded()));
-
-    int nCount = m_builds.Filtered().Count();
-
-    RefreshLayout(nCount);
+    RefreshLayout();
     RefreshData();
- }
+}
 
-void StatusScreen::RefreshLayout(int nCount)
+
+void StatusScreen::RefreshLayout()
 {
+    Builds builds = m_builders->builds();
+    int nCount = builds.count();
     if (nCount == 0)
         return;
 
-    showMaximized();
 
     if (m_discoveredBuilds != nCount)
     {
@@ -85,24 +55,25 @@ void StatusScreen::RefreshLayout(int nCount)
         m_DisplayLines.clear();
         m_Icons.clear();
 
-        m_lineHeight = (m_windowHeight-100) / nCount;
+        m_lineHeight = (height()-14* nCount) / nCount;
 
         QVBoxLayout * layout = new QVBoxLayout();
         for (int i=0; i<nCount; i++)
         {
             QHBoxLayout * line = new QHBoxLayout();
-            QPixmap * image;
-            Build::TARGET_OS os = m_builds.Filtered().Target(i);
+            QPixmap image;
+            Build::TARGET_OS os = builds.at(i)->Target();
             switch (os)
             {
-                case Build::Windows: image = new QPixmap(":/resources/windows-logo.png"); break;
-                case Build::Mac: image = new QPixmap(":/resources/osx_logo.jpg"); break;
-                case Build::Linux: image = new QPixmap(":/resources/linux-logo.jpg"); break;
-                default: image = new QPixmap(":/resources/undefined.png");
+                case Build::Windows: image = QPixmap(":/resources/windows-logo.png"); break;
+                case Build::Mac: image = QPixmap(":/resources/osx_logo.jpg"); break;
+                case Build::Linux: image = QPixmap(":/resources/linux-logo.jpg"); break;
+                default: image = QPixmap(":/resources/undefined.png");
             }
 
             QLabel * label = new QLabel(this);
-            QPixmap scaled = image->scaledToHeight(m_lineHeight);
+            QPixmap scaled = image.scaledToHeight(m_lineHeight);
+
             label->setPixmap(scaled);
             label->resize(50, 50);
             line->addWidget(label);
@@ -125,12 +96,12 @@ void StatusScreen::RefreshLayout(int nCount)
  }
 
 void StatusScreen::InitDisplayMessage()
-{
-    QStringList messages = m_builds.Filtered().WaitMessages();
-    UpdateStyleSheets(messages.count());
-    for (int i=0; i<messages.count(); i++)
+{  
+    UpdateStyleSheets(m_builders->builds().count());
+    for (int i=0; i<m_builders->builds().count(); i++)
     {
-        m_DisplayLines.at(i)->setText(messages.at(i));
+        QString message = QString("Waiting for response from : %1").arg(m_builders->builds().at(i)->Url());
+        m_DisplayLines.at(i)->setText(message);
     }
 }
 
@@ -140,7 +111,7 @@ void StatusScreen::UpdateStyleSheets(int nCount)
     if (0 == nCount)
         return;
 
-    m_lineHeight = (m_windowHeight-100) / nCount;
+    m_lineHeight = (height()-14* nCount) / nCount;
 
      for (int i=0; i<nCount; i++)
      {
@@ -159,31 +130,54 @@ void StatusScreen::RefreshData()
 {
     RefreshUpTime();
 
-    m_refreshInterval ++;
-    if (m_refreshInterval < 5)
+    Builds builds = m_builders->builds();
+
+    if(builds.count() == 0)
         return;
-    m_refreshInterval = 0;
 
-    Builds b = m_builds.Filtered();
-    UpdateStyleSheets(b.Count());
+    UpdateStyleSheets(builds.count());
 
-    if (b.Failed())
+    bool anyFailed = false;
+    for(int i = 0; i < builds.count();++i)
+    {
+        Build * build = builds.at(i);
+        if(build->Failed())
+        {
+            anyFailed = true;
+            continue;
+        }
+    }
+    if (anyFailed)
         m_mainWindow->setStyleSheet(QString("QWidget {background: black;}"));
     else
-       m_mainWindow->setStyleSheet(QString("QWidget {background: white;}"));
+        m_mainWindow->setStyleSheet(QString("QWidget {background: white;}"));
 
-    for (int i=0; i<b.Count(); i++)
+
+    for(int i = 0; i < builds.count();++i)
     {
-        if (b.Failed(i))
-            m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FF5555, stop: 1 #FF0000); font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
-        else if (b.Success(i))
-              m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #AAAAFF, stop: 1 #0000FF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
-        else if (b.IsBuilding(i))
-            m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; color: black; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFCC, stop: 1 #FFFF00); font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
+        Build * build = builds.at(i);
 
-        m_DisplayLines.at(i)->setText(b.StatusMessage(i));
+        Build::STATUS status = build->Status();
+        switch (status)
+        {
+        case Build::BUILDING:
+                m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; color: black; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFCC, stop: 1 #FFFF00); font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
+                break;
+        case Build::FAILURE:
+                m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1px; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FF5555, stop: 1 #FF0000); font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
+                break;
+        case Build::SUCCESS:
+                m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #AAAAFF, stop: 1 #0000FF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
+                break;
+        case Build::ABORTED:
+                m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #666666, stop: 1 #666666);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
+                break;
+        default:
+                m_DisplayLines.at(i)->setStyleSheet(QString("QLineEdit {  height: %1; border: 2px solid gray; border-radius: 5px; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #FFFFFF);; color: white; font-size: 12pt; font-weight:bold;}").arg(m_lineHeight));
+                break;
+        }
+        m_DisplayLines.at(i)->setText(build->ToDisplayString());
     }
 
-    m_builds.RemoveStale();
-    showMaximized();
+    m_builders->RemoveStale();
  }

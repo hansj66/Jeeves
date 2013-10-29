@@ -18,46 +18,85 @@
 #include <QDomDocument>
 #include <QDebug>
 #include <QStringList>
+
+#include <QtNetwork>
 #include "builder.h"
 #include "log.h"
 
-Builder::Builder(QString xml, QObject * parent)
-    : QObject(parent),
-      m_XML(xml)
+Builder::Builder()
 {
-    m_valid = true;
-    tagData(xml);
+
 }
 
-QString Builder::API()
+Builder::Builder(const QByteArray &xml)
 {
-    return QString("%1api/xml/").arg(rootUrl(tagData("url")));
+    parseXml(xml);
 }
 
-
-QString Builder::rootUrl(QString url)
+bool Builder::parseXml(const QByteArray &xml)
 {
-    return url.left(url.lastIndexOf("/")+1);
-}
-
-QString Builder::tagData(QString tag)
-{
+    clear();
     QDomDocument doc;
-    if (!doc.setContent(m_XML))
+    if (!doc.setContent(xml))
     {
-        Log::Instance()->Error(QString("Bummer ! Looks like the build machine URL : %1 - is complete garbage.").arg(m_XML));
-        return QString();
+        Log::Instance()->Error(QString("Bummer ! Looks like the build machine is complete garbage."));
+        return false;
     }
-
     QDomElement root = doc.documentElement();
-    QDomNodeList elements = root.elementsByTagName("url");
-    if (1 != elements.count())
-    {
-        Log::Instance()->Error(QString("Dang ! I was hoping for a single element. Instead we got %1. This probably should not happen...").arg(elements.count()));
-        m_valid = false;
-        return QString();
-    }
+    if(root.tagName() != "hudson")
+        return false;
 
-    return elements.at(0).toElement().text();
+    QDomNode nodeParent = root.firstChild();
+    while(!nodeParent.isNull())
+    {
+        QDomElement element = nodeParent.toElement();
+        if(!element.isNull())
+        {
+            if(element.tagName() == "job")
+            {
+                QDomNode jobNode = nodeParent.firstChild();
+                Build * build = new Build(jobNode);
+                m_builds.append(build);
+            }
+        }
+        nodeParent = nodeParent.nextSibling();
+    }
+    return true;
+}
+
+
+
+Builds Builder::builds() const
+{
+    return m_builds;
+}
+
+void Builder::clear()
+{
+    foreach(Build * b, m_builds)
+    {
+        delete b;
+    }
+    m_builds.clear();
+
+}
+
+int Builder::RemoveStale()
+{
+    int removed = 0;
+    foreach(Build * b, m_builds)
+    {
+        if(b->LastHeardFrom().addSecs(300) <  QDateTime::currentDateTime())
+        {
+           m_builds.removeOne(b);
+           removed++;
+           if(b)
+           {
+               delete b;
+               b = 0L;
+           }
+        }
+    }
+    return removed;
 }
 

@@ -15,16 +15,19 @@ TEMPLATE = app
 INCLUDEPATH += $$(BOOSTPATH)
 INCLUDEPATH += ./code
 
+#INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/src"
+#LIBS += "-LC:/Program Files (x86)/Visual Leak Detector/lib/Win32/" -lvld
 
 SOURCES += code/main.cpp \
     code/locator.cpp \
     code/log.cpp \
     code/jeeves.cpp \
-    code/interrogator.cpp \
+    code/FileDownloader.cpp \
     code/build.cpp \
     code/statusscreen.cpp \
-    code/builds.cpp \
-    code/builder.cpp
+    code/builder.cpp \
+    code/builders.cpp \
+    code/HtmlGenerator.cpp
 
 HEADERS += \
     code/errors.h \
@@ -32,11 +35,12 @@ HEADERS += \
     code/locator.h \
     code/log.h \
     code/jeeves.h \
-    code/interrogator.h \
+    code/FileDownloader.h \
     code/build.h \
     code/statusscreen.h \
-    code/builds.h \
-    code/builder.h
+    code/builder.h \
+    code/builders.h \
+    code/HtmlGenerator.h
 
 RESOURCES += \
     jeeves.qrc \
@@ -57,4 +61,5 @@ win32-msvc {
 
 OTHER_FILES += \
     LICENSE.TXT \
-    README.md
+    README.md \
+    Jeeves.css

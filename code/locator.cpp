@@ -30,28 +30,26 @@ Locator::Locator(QHostAddress & broadcastAddress, QObject *parent) :
     m_udpSocket(0),
     m_broadcastAddress(broadcastAddress)
 {
+    run();
+    m_broadcastTimer = new QTimer(this);
+    connect(m_broadcastTimer, SIGNAL(timeout()), this, SLOT(run()));
+    m_broadcastTimer->start(60000);
+
 }
 
 void Locator::clear()
 {
-    foreach(Builder * builder, m_builders)
-    {
-        delete builder;
-        builder = nullptr;
-    }
-    m_builders.clear();
     delete m_udpSocket;
-    m_udpSocket = nullptr;
+    m_udpSocket = 0L;
 
 }
-
 
 void Locator::run()
  {
     clear();
     Log::Instance()->Status(QString("Broadcasting on %1 (UDP port %2)...").arg(m_broadcastAddress.toString()).arg(Jenkins_UDP));
 
-    if (0 != m_udpSocket)
+    if (0L != m_udpSocket)
         delete m_udpSocket;
     m_udpSocket = new QUdpSocket();
 
@@ -61,38 +59,71 @@ void Locator::run()
     m_udpSocket->writeDatagram(message.data(),message.size(), m_broadcastAddress , Jenkins_UDP );
  }
 
-void Locator::readPendingDatagrams()
+
+void Locator::CheckForBuilderChanges(QSet<QString> buildMachineURLs)
 {
-    cout << "Waiting for a response..." << std::endl;
-    for (int i=0; i< 10; i++)
-    while (m_udpSocket->hasPendingDatagrams())
-    {
-        QByteArray datagram;
-        datagram.resize(m_udpSocket->pendingDatagramSize());
-        QHostAddress sender;
-        m_udpSocket->readDatagram(datagram.data(), datagram.size(), &sender);
-        Builder * builder =  new Builder(QString(datagram),this);
-        if(builder->isValid())
-        {
-            m_builders.append(builder);
-            Log::Instance()->Status(QString("Jenkins discovered on:   %1").arg(sender.toString()));
-            Log::Instance()->Status(QString("Url                  :   %1").arg(builder->API()));
-        }
-        else
-            delete builder;
-    }
-    emit finished();
+    if(buildMachineURLs.isEmpty()) return;
+    QSet<QString> newBuilds;
+    QSet<QString> disapearedBuilds;
+
+    disapearedBuilds = m_knownBuildMachines - buildMachineURLs;
+    if(!disapearedBuilds.isEmpty())
+        emit buildersDisapeared(disapearedBuilds.toList());
+
+    newBuilds = buildMachineURLs - m_knownBuildMachines;
+    if(!newBuilds.isEmpty())
+        emit buildersFound(newBuilds.toList());
+
+    m_knownBuildMachines = buildMachineURLs;
+
 }
 
- QStringList Locator::BuildMachineAPIs()
- {
-     QStringList apiList;
-     for (int i=0; i<m_builders.count(); i++)
-     {
-         apiList.append(m_builders.at(i)->API());
-     }
-     return apiList;
- }
+void Locator::readPendingDatagrams()
+{
+    Log::Instance()->Status(QString("Waiting for a response..."));
+    QSet<QString> builderUrls;
+
+//    for (int i=0; i< 10; i++)
+//    {
+        while (m_udpSocket->hasPendingDatagrams())
+        {
+            QByteArray datagram;
+            datagram.resize(m_udpSocket->pendingDatagramSize());
+            QHostAddress sender;
+            m_udpSocket->readDatagram(datagram.data(), datagram.size(), &sender);
+            QString datagramString = QString(datagram);
+            QString url = GetUrl(datagramString);
+
+            //Log::Instance()->Status(QString("Jenkins discovered on:   %1").arg(sender.toString()));
+
+            if(!url.isEmpty())
+            {
+                builderUrls << url;
+                Log::Instance()->Status(QString("Url                  :   %1").arg(url));
+            }
+        }
+    //}
+    CheckForBuilderChanges(builderUrls);
+}
+
+QString Locator::GetUrl(const QString &datagram) const
+{
+    QDomDocument doc;
+    if (!doc.setContent(datagram))
+    {
+        Log::Instance()->Error(QString("Bummer ! Looks like the build machine URL : %1 - is complete garbage.").arg(datagram));
+        return QString();
+    }
+
+    QDomElement root = doc.documentElement();
+    QDomNodeList elements = root.elementsByTagName("url");
+    if (1 != elements.count())
+    {
+       // Log::Instance()->Error(QString("Dang ! I was hoping for a single element. Instead we got %1. This probably should not happen...").arg(elements.count()));
+        return QString();
+    }
+    return QString("%1api/xml/").arg(elements.at(0).toElement().text());
+}
 
 
 

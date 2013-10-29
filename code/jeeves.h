@@ -23,14 +23,26 @@
 #include <QTimer>
 
 #include "locator.h"
-#include "interrogator.h"
+#include "builders.h"
 
 class Jeeves : public QApplication
 {
     Q_OBJECT
 
 public:
-    Jeeves(QHostAddress broadcastAddress, int &argc, char **argv);
+    typedef enum {
+        HTML,
+        GUI
+    } Mode;
+
+
+    Jeeves(QHostAddress broadcastAddress, Mode mode,  int &argc, char **argv);
+
+
+private:
+    Builders *  m_builders;
+    Locator * m_locater;
+
 
 };
 

@@ -18,26 +18,24 @@
 #ifndef BUILDER_H
 #define BUILDER_H
 
-#include <QObject>
 #include <QString>
+#include "build.h"
 
-class Builder: QObject
+typedef QList<Build* > Builds;
+
+class Builder
 {
-    Q_OBJECT
-
 public:
-    Builder(QString xml, QObject * parent);
-    QString API();
-    bool isValid() { return m_valid;}
+    Builder();
+    Builder(const QByteArray &xml);
+    bool parseXml(const QByteArray &xml);
+    Builds builds() const;
+    void clear();
+    int RemoveStale();
 
 private:
-    QString rootUrl(QString xml);
-    QString tagData(QString tag);
 
-    QString m_API;
-    QString m_XML;
-    QString m_Target;
-    bool m_valid;
+    Builds m_builds;
 };
 
 #endif // BUILDER_H

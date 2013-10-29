@@ -16,49 +16,231 @@
 */
 
 #include <QDebug>
+#include <QXmlStreamReader>
 #include "build.h"
+#include "log.h"
 
 Build::Build() :
     m_lastHeardFrom(QDateTime::currentDateTime())
 {
+   m_status = UNKNOWN;
+   m_isBuildable = false;
 }
 
-QString Build::ToString() const
+
+Build::Build(QDomNode node) :
+    m_lastHeardFrom(QDateTime::currentDateTime())
 {
-    QString build = QString("\n\n\tname=%1\n\tlast build number=%2\n\turl=%3\n\tResult=%4\n\tAlive=%5\n\tIs building=%6\n\tIs buildable=%7\n").arg(Name()).arg(m_number).arg(m_url).arg(m_result).arg(m_lastHeardFrom.toString()).arg(m_isBuilding).arg(m_isBuildable);
+    m_isBuildable = false;
 
-    if (m_culprits.length() == 0)
-        return build;
-
-    build.append("\tculprits=");
-    for (int i=0; i<m_culprits.length(); i++)
-        build.append(QString("%1,").arg(m_culprits.at(i)));
-    return build.left(build.length()-1);
+    while(!node.isNull())
+    {
+        QDomElement element = node.toElement();
+        if(!element.isNull())
+        {
+            if(element.tagName() == "name")
+               setName(element.text());
+            else if(element.tagName() == "url")
+                setUrl(element.text());
+            else if(element.tagName() == "buildable")
+                setBuildable(element.text().toLower() == "true");
+        }
+        node = node.nextSibling();
+    }
 }
+
+
+bool Build::parseLastBuildXml(const QByteArray &xmlString)
+{
+    if(xmlString.isEmpty())
+        return false;
+
+    QDomDocument doc;
+    if (!doc.setContent(xmlString))
+    {
+        Log::Instance()->Error(QString("Bummer ! Looks like the build machine is complete garbage."));
+        return false;
+    }
+
+    QDomElement root = doc.documentElement();
+    if(root.tagName() != "freeStyleBuild")
+        return false;
+
+    setCulprits(QStringList());
+    setStartedBy(QString());
+    QStringList culprits;
+    QDomNode nodeParent = root.firstChild();
+    while(!nodeParent.isNull())
+    {
+        QDomElement element = nodeParent.toElement();
+        if(!element.isNull())
+        {
+            if(element.tagName() == "result")
+               setResult(element.text());
+            else if(element.tagName() == "building" && element.text().toLower() == "true")
+                setStatus(BUILDING);
+            else if(element.tagName() == "number")
+               setNumber(element.text());
+            else if(element.tagName() == "culprit")
+            {
+                QDomNode culpritNode = element.firstChild();
+
+                while(!culpritNode.isNull())
+                {
+                    QDomElement culpritElement = culpritNode.toElement();
+                    if(culpritElement.tagName() == "fullName")
+                       culprits << culpritElement.text();
+                    culpritNode = culpritNode.nextSibling();
+                }
+
+            }
+            else if(element.tagName() == "action")
+            {
+                QDomNode actionNode = element.firstChild();
+                while(!actionNode.isNull())
+                {
+                    QDomElement actionElement = actionNode.toElement();
+                    if(actionElement.tagName() == "cause")
+                    {
+                        QDomNode causeNode = actionElement.firstChild();
+                        while(!causeNode.isNull())
+                        {
+                            QDomElement causeElement = causeNode.toElement();
+                            if(causeElement.tagName() == "userName")
+                               setStartedBy(causeElement.text());
+                            causeNode = causeNode.nextSibling();
+                        }
+
+                    }
+                    actionNode = actionNode.nextSibling();
+                }
+            }
+
+
+
+        }
+        nodeParent = nodeParent.nextSibling();    
+    }
+    setCulprits(culprits);
+    return true;
+}
+
+
+bool Build::parseXml(const QByteArray & xmlString)
+{
+    if(xmlString.isEmpty())
+        return false;
+
+    QDomDocument doc;
+    if (!doc.setContent(xmlString))
+    {
+        Log::Instance()->Error(QString("Bummer ! Looks like the build machine is complete garbage."));
+        return false;
+    }
+    QDomElement root = doc.documentElement();
+    if(root.tagName() != "freeStyleProject")
+        return false;
+
+
+    setBuildable("");
+    setCulprits(QStringList());
+
+    QDomNode nodeParent = root.firstChild();
+    while(!nodeParent.isNull())
+    {
+        QDomElement element = nodeParent.toElement();
+        if(!element.isNull())
+        {
+            if(element.tagName() == "lastBuild")
+            {
+                QDomNode lastBuildNode = nodeParent.firstChild();
+                while(!lastBuildNode.isNull())
+                {
+                    QDomElement lastBuildElement = lastBuildNode.toElement();
+                    if(lastBuildElement.tagName() == "url")
+                       setLastBuildUrl(lastBuildElement.text());
+
+                    lastBuildNode = lastBuildNode.nextSibling();
+                }
+
+            }
+            else if(element.tagName() == "description")
+                setDescription(element.text());
+            else if(element.tagName() == "buildable")
+            {
+                setBuildable(element.text().toLower() == "true");
+                if(element.text().toLower() != "true")
+                    return false;
+            }
+
+        }
+        nodeParent = nodeParent.nextSibling();
+    }
+    setLastHeardFrom(QDateTime::currentDateTime());
+    return true;
+
+}
+
+
+
+void Build::setResult(const QString &result)
+{
+    if(result == "ABORTED")
+    {
+         setStatus(ABORTED);
+    }
+    else if(result == "SUCCESS")
+    {
+         setStatus(SUCCESS);
+    }
+    else if(result == "FAILURE")
+    {
+        setStatus(FAILURE);
+    }
+    else
+        setStatus(UNKNOWN);
+}
+
 
 QString Build::ToDisplayString() const
 {
-    QString build = QString("%1:%2 (Build #%3) ").arg(MachineShortName()).arg(Name()).arg(m_number);
+    QString build = QString("%1: %2 (Build #%3) ").arg(MachineShortName()).arg(Name()).arg(m_number);
+    build.replace("_"," ");
 
     if (m_culprits.length() == 0)
         return build;
-    if(Failed())
-        build.append("Culprit");
-    else
+
+    if(Status() == SUCCESS)
+    {
         build.append("Hero");
+    }
+    else if(Status() == FAILURE)
+    {
+        build.append("Culprit");
+    }
+    else if(Status() == BUILDING)
+    {
+        build.append(StartedBy());
+        return build;
+    }
+    else if(Status() == ABORTED)
+    {
+        build.append("Who did it?");
+        return build;
+    }
 
     if (m_culprits.length() > 1)
         build.append("s");
 
     build.append(" : ");
     for (int i=0; i<m_culprits.length(); i++)
-        build.append(QString("%1,").arg(m_culprits.at(i)));
-    return build.left(build.length()-1);
+        build.append(QString("%1, ").arg(m_culprits.at(i)));
+    return build.left(build.length()-2);
 }
 
 QString Build::MachineShortName() const
 {
-    return m_url.right(m_url.length()-7).split("/").at(0).split(":").at(0);
+    return m_url.right(m_url.length()-7).split("/").at(0).split(":").at(0).split(".").at(0);
 }
 
 bool Build::IsConsistent() const
@@ -68,7 +250,7 @@ bool Build::IsConsistent() const
     return true;
 }
 
-void Build::Description(QString description)
+void Build::setDescription(const QString &description)
 {
     m_description = description;
 
@@ -79,6 +261,3 @@ void Build::Description(QString description)
     if (m_description.toLower().contains("[target=linux]"))
         m_target = Linux;
 }
-
-
-

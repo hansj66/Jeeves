@@ -17,10 +17,37 @@
 
 #include "jeeves.h"
 #include "statusscreen.h"
+#include "HtmlGenerator.h"
 
-Jeeves::Jeeves(QHostAddress broadcastAddress, int &argc, char **argv) :
+Jeeves::Jeeves(QHostAddress broadcastAddress, Mode mode, int &argc, char **argv) :
     QApplication(argc, argv)
 {
-   new StatusScreen(broadcastAddress);
+    m_locater = new Locator(broadcastAddress, this);
+    m_builders = new Builders();
+
+    connect(m_locater, SIGNAL(buildersDisapeared(QStringList)),m_builders,SLOT(OnRemoveBuilders(QStringList)));
+    connect(m_locater, SIGNAL(buildersFound(QStringList)),m_builders,SLOT(OnAddBuilders(QStringList)));
+
+    switch (mode)
+    {
+        case GUI:
+            new StatusScreen(m_builders); break;
+        case HTML:
+           QPixmap image(":/resources/windows-logo.png");
+           image.save("windows-logo.png");
+
+           image.load(":/resources/osx_logo.jpg");
+           image.save("osx_logo.jpg");
+
+           image.load(":/resources/linux-logo.jpg");
+           image.save("linux-logo.jpg");
+
+           image.load(":/resources/undefined.png");
+           image.save("undefined.png");
+           new HtmlGenerator(m_builders,this);
+           break;
+    }
+
+
  }
 
