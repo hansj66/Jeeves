@@ -51,6 +51,7 @@ public:
     bool          Failed()           const { return m_status == FAILURE; }
     bool          IsBuildable()      const { return m_isBuildable; }
     bool          IsConsistent()     const;
+	bool          IsHidden()         const { return m_hidden; }
     QString       LastBuildUrl()     const  { return m_lastBuildUrl; }
     QDateTime     LastHeardFrom()    const { return m_lastHeardFrom; }
     QString       MachineShortName() const;
@@ -67,6 +68,7 @@ private:
     void setBuildable(const bool & isBuildable)      { m_isBuildable = isBuildable; }
     void setCulprits(const QStringList & culprits)   {m_culprits = culprits; }
     void setDescription(const QString & description);
+	void setHidden(bool hidden = true)               { m_hidden = hidden; }
     void setLastBuildUrl(const QString &lastBuildUrl){m_lastBuildUrl = lastBuildUrl + "api/xml";}
     void setLastHeardFrom(const QDateTime & time)    { m_lastHeardFrom = time; }
     void setName(const QString & name)               { m_name=name; }
@@ -78,6 +80,7 @@ private:
 
     QStringList m_culprits;
     QString m_description;
+	bool    m_hidden;
     bool    m_isBuildable;
     QDateTime m_lastHeardFrom;
     QString m_name;

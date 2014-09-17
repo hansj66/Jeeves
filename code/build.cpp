@@ -23,8 +23,9 @@
 Build::Build() :
     m_lastHeardFrom(QDateTime::currentDateTime())
 {
-   m_status = UNKNOWN;
-   m_isBuildable = false;
+	m_hidden = false;
+	m_status = UNKNOWN;
+	m_isBuildable = false;
 }
 
 
@@ -32,6 +33,7 @@ Build::Build(QDomNode node) :
     m_lastHeardFrom(QDateTime::currentDateTime())
 {
     m_isBuildable = false;
+	m_hidden = false;
 
     while(!node.isNull())
     {
@@ -258,6 +260,15 @@ void Build::setDescription(const QString &description)
         m_target = Windows;
     else if (m_description.toLower().contains("[target=mac]"))
         m_target = Mac;
-    if (m_description.toLower().contains("[target=linux]"))
+	else if (m_description.toLower().contains("[target=linux]"))
         m_target = Linux;
+
+
+	if (m_description.toLower().contains("[hide=true]"))
+		setHidden();
+
+
+
+
+
 }

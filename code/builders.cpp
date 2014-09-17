@@ -45,7 +45,7 @@ Builds Builders::builds() const
         i.next();
         foreach( Build * b, i.value()->builds())
         {
-            if(b->IsConsistent() && b->IsBuildable())
+			if(b->IsConsistent() && b->IsBuildable() && !b->IsHidden())
                 builds.append(b);
         }
     }

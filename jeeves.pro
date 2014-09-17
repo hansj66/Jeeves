@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core network xml gui
-
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = jeeves
 CONFIG   += console
 CONFIG   -= app_bundle
